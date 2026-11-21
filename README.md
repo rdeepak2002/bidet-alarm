@@ -14,6 +14,8 @@ Built for an **Arofa handheld bidet sprayer** with a 7/8" T-valve. The lever poi
 4. **Open:** the lever swings 90°, the switch opens and a 10-minute timer starts.
 5. If the valve is still open after 10 minutes, the buzzer sounds and repeats every 30 s until someone closes it.
 
+**Alternate build with parts you may already have:** [`pi-design/`](pi-design/index.html) uses a Raspberry Pi 4B, a KY-024 Hall sensor and a USB speaker. It has its own plan page, a sensor holder and `pi/bidet_alarm.py`.
+
 Open **`assembly.html`** in a browser for the interactive 3D assembly. It has an open/close animation, an exploded view of the box with the wires, a wiring diagram, the parts list and print settings.
 
 ![Box and wiring](docs/box-and-wiring.png)
