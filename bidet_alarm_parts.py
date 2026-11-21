@@ -28,7 +28,7 @@ SEG = 64
 # Lever cap -- the lever looked ~6 mm thick in the video; several bores are printed.
 LEVER_BORES = [5.6, 6.0, 6.4, 6.8]   # bore diameters to generate
 CAP_BORE_DEPTH = 9.0                 # how far the cap slides onto the lever (keep it below the knob disc)
-MAGNET_D, MAGNET_H = 6.0, 3.0        # neodymium disc magnet
+MAGNET_D, MAGNET_H = 6.0, 4.0        # two stacked 6x2 mm discs (Caturledas mix pack)
 MAGNET_FIT = 0.25                    # extra diameter for the magnet pocket
 
 # Reed sensor (MC-38 style wired door contact, sensor half only)
