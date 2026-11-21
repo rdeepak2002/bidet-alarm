@@ -171,7 +171,18 @@
       <li><input type="checkbox"><span>Power on the Pi and wait about 3 minutes. Then run <code>./pi/setup_from_mac.sh</code> on the Mac. It finds <code>bidet-alarm.local</code>, checks SSH and Wi-Fi, copies the project over and installs what the alarm needs. After that, <code>ssh bidet-alarm</code> logs you straight in.</span></li>
     </ul>
 
-    <div class="phase">Phase 1 · Desk test (15 min): confirms the magnet and sensor before printing</div>
+    <div class="phase" style="margin-top:14px">Start now · Sensor test with no SD card (10 min). The Pi's 3.3 V pin is live as soon as it's powered.</div>
+    <ul class="check">
+      <li><input type="checkbox"><span><b>Unplug the Pi.</b> Find <b>pin 1</b>: it's at the end of the 40-pin header <b>farthest from the USB/Ethernet ports</b>, on the row <b>toward the middle of the board</b>. The pin right next to it, on the outer row, is <b>pin 2, which is 5 V. Don't use it.</b> Pin 6 (GND) is on the outer row, 3rd from that end.</span></li>
+      <li><input type="checkbox"><span>Connect <b>KY-024 "+" to pin 1</b> and <b>"G" to pin 6</b> with female-to-female jumpers. Leave D0 and A0 unconnected for now.</span></li>
+      <li><input type="checkbox"><span>Plug in the Pi's USB-C power, with no SD card. One LED on the KY-024 (power) should light. If neither lights, unplug and re-check the two wires.</span></li>
+      <li><input type="checkbox"><span>Stack two 6×2 mm magnets and hold one flat face toward the <b>front of the black Hall sensor</b> (the side with the printing). If the second LED doesn't react, try the other face.</span></li>
+      <li><input type="checkbox"><span>Turn the blue <b>threshold screw</b>. It's multi-turn, so it may take several full turns. Stop when the second LED turns <b>on with the magnet about 5 mm away</b> and <b>off when you pull it away</b>, about 3 cm or more.</span></li>
+      <li><input type="checkbox"><span>Mark the magnet face that works with a marker. That face must point at the sensor when the magnets go in the lever cap.</span></li>
+      <li><input type="checkbox"><span>While it's out, measure the KY-024 board's <b>length</b> (header end to sensor end) and <b>width</b>, and send them to Claude.</span></li>
+    </ul>
+
+    <div class="phase" style="margin-top:14px">Phase 1 · Desk test (15 min): confirms the magnet and sensor before printing</div>
     <ul class="check">
       <li><input type="checkbox"><span>Wire the KY-024 to the Pi: <b>+ to pin 1</b>, <b>G to pin 6</b>, <b>D0 to pin 11</b>.</span></li>
       <li><input type="checkbox"><span>Copy the repo to the Pi, e.g. <code>git clone</code> it, or <code>scp -r</code> the folder to <code>/home/pi/bidet-alarm</code>.</span></li>
