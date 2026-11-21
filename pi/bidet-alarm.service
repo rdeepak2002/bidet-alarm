@@ -1,0 +1,19 @@
+# Start the bidet alarm at boot.
+#   sudo cp bidet-alarm.service /etc/systemd/system/
+#   sudo systemctl enable --now bidet-alarm
+#   journalctl -u bidet-alarm -f        # watch it
+# Edit the paths/user below if your checkout is elsewhere.
+[Unit]
+Description=Bidet valve alarm
+After=sound.target network-online.target
+
+[Service]
+User=pi
+WorkingDirectory=/home/pi/bidet-alarm/pi
+ExecStart=/usr/bin/python3 /home/pi/bidet-alarm/pi/bidet_alarm.py
+Environment=MAGNET_NEAR_VALUE=0
+# Environment=NTFY_TOPIC=pick-a-long-random-name-here
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
