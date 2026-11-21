@@ -239,7 +239,6 @@ const PRINT = 0xf08a24, PRINT2 = 0xf5b041;
 const V1 = makeViewer(document.getElementById('v1'), [24,-5,-50], [-120,-190,-5]);
 V1.s.add(mesh(A.valve, METAL.color, {metalness:0.25, roughness:0.35}));
 V1.s.add(mesh(A.pipe, 0x9aa0a8, {metalness:0.2, roughness:0.5}));
-V1.s.add(mesh(A.hose, 0x9aa0a8, {metalness:0.2, roughness:0.5}));
 const tank = new THREE.Mesh(new THREE.BoxGeometry(140, 70, 6), new THREE.MeshStandardMaterial({color:0xf4f1ea}));
 tank.position.set(0, 10, 45); V1.s.add(tank);
 const leverGroup = new THREE.Group();

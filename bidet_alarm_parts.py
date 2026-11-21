@@ -168,7 +168,6 @@ LEVER_LEN, LEVER_Y = 26.0, -STANDOFF
 valve = cyl(20, 55).translate([0, 0, -25])                                  # T-valve body
 valve += cyl(30, 8).rotate([90, 0, 0]).translate([0, -10, 0])                 # knob disc
 valve += cyl(22, 10, 6).translate([0, 0, -35])                                # coupling nut
-valve += cyl(16, 12).rotate([0, 90, 0]).translate([10, 0, 5])                 # sprayer outlet
 valve += cyl(24, 12, 6).translate([0, 0, 30])                                 # tank adapter
 pipe = cyl(PIPE_D, 70, 24).translate([0, 0, -105])
 hose = cyl(9, 30, 24).rotate([0, 90, 0]).translate([22, 0, 5])
