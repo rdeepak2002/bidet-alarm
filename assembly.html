@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bidet Alarm Assembly</title>
+<style>
+  :root { --bg:#f6f5f2; --card:#fff; --ink:#1d1d1f; --muted:#6b6b70; --line:#e3e1dc; --accent:#2f6fde; --warn:#c2410c; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#16171a; --card:#1f2024; --ink:#ececee; --muted:#9a9aa2; --line:#2e2f35; --accent:#6ea0ff; --warn:#fb923c; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  main { max-width:1100px; margin:0 auto; padding:28px 16px 60px; }
+  h1 { font-size:26px; margin:0 0 4px; }
+  h2 { font-size:19px; margin:0 0 10px; }
+  p.sub { color:var(--muted); margin:0 0 24px; }
+  .grid { display:grid; grid-template-columns: 1.25fr 1fr; gap:18px; margin-bottom:22px; }
+  @media (max-width: 820px) { .grid { grid-template-columns:1fr; } }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; }
+  .view { position:relative; height:420px; border-radius:8px; overflow:hidden; background:linear-gradient(#eef0f4,#dfe3ea); }
+  @media (prefers-color-scheme: dark) { .view { background:linear-gradient(#2a2d33,#1c1e22); } }
+  .view canvas { display:block; width:100%; height:100%; }
+  .controls { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:12px; }
+  button { font:inherit; padding:7px 14px; border-radius:8px; border:1px solid var(--line); background:var(--card); color:var(--ink); cursor:pointer; }
+  button.on { background:var(--accent); color:#fff; border-color:var(--accent); }
+  input[type=range] { flex:1; min-width:140px; }
+  .badge { font-size:13px; padding:3px 9px; border-radius:99px; background:var(--line); }
+  .badge.alarm { background:var(--warn); color:#fff; }
+  ol { padding-left:20px; margin:0; } li { margin-bottom:8px; }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  td, th { text-align:left; padding:6px 6px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { color:var(--muted); font-weight:600; }
+  a { color:var(--accent); }
+  code { font-family: ui-monospace, Menlo, monospace; font-size:13px; }
+  .legend { display:flex; flex-wrap:wrap; gap:10px; font-size:13px; color:var(--muted); margin-top:8px; }
+  .sw { display:inline-block; width:11px; height:11px; border-radius:3px; margin-right:5px; vertical-align:-1px; }
+  .hint { font-size:12px; color:var(--muted); position:absolute; left:10px; bottom:8px; }
+  svg text { fill: var(--ink); font-size:12px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Bidet alarm: how it goes together</h1>
+  <p class="sub">Drag to rotate, scroll to zoom. Orange parts are 3D printed; grey parts are your existing valve and plumbing.</p>
+
+  <div class="grid">
+    <section class="card">
+      <h2>1 · At the T-valve</h2>
+      <div class="view" id="v1"><span class="hint">drag to orbit</span></div>
+      <div class="controls">
+        <button id="bClosed" class="on">Knob closed</button>
+        <button id="bOpen">Knob open</button>
+        <span class="badge" id="state">Magnet next to sensor → OK</span>
+      </div>
+      <div class="legend">
+        <span><i class="sw" style="background:#f08a24"></i>Lever cap (printed)</span>
+        <span><i class="sw" style="background:#f5b041"></i>Sensor cradle (printed)</span>
+        <span><i class="sw" style="background:#3b6fd8"></i>Magnet</span>
+        <span><i class="sw" style="background:#f2f2f2;border:1px solid #bbb"></i>Reed sensor</span>
+      </div>
+    </section>
+    <section class="card">
+      <h2>Mounting steps</h2>
+      <ol>
+        <li>Print all four <code>lever_cap_*.stl</code> sizes. Push each onto the lever and keep the one that slides on snugly.</li>
+        <li>Press the 6×3 mm magnet into the pocket in the cap's closed end, with a drop of superglue.</li>
+        <li>Slide the cap onto the lever (bonding it with a drop of superglue is optional). The magnet now sits at the lever tip.</li>
+        <li>Push the reed sensor into the cradle's pocket, with the wires coming out the slot at the bottom.</li>
+        <li>With the knob <b>closed</b>, hold the cradle against the supply line under the lever tip. Its V-groove goes against the hose.</li>
+        <li>Slide it up until there's a <b>3–5 mm gap</b> to the magnet. Then loop 2 zip ties through the channels, around both the sensor and the hose, and tighten.</li>
+        <li>Open the knob and check that the lever swings clear of the cradle.</li>
+      </ol>
+    </section>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <h2>2 · The alarm box</h2>
+      <div class="view" id="v2"><span class="hint">drag to orbit</span></div>
+      <div class="controls">
+        <span>Explode</span><input type="range" id="explode" min="0" max="1" step="0.01" value="0.6">
+      </div>
+      <div class="legend">
+        <span><i class="sw" style="background:#f08a24"></i>Base / lid (printed)</span>
+        <span><i class="sw" style="background:#1f7a4d"></i>Arduino Nano</span>
+        <span><i class="sw" style="background:#222"></i>12 mm buzzer</span>
+        <span><i class="sw" style="background:#f2c200"></i>D2 → sensor</span>
+        <span><i class="sw" style="background:#d62828"></i>D8 → buzzer +</span>
+        <span><i class="sw" style="background:#1a1a1a;border:1px solid #666"></i>GND</span>
+      </div>
+    </section>
+    <section class="card">
+      <h2>Box steps</h2>
+      <ol>
+        <li>Solder wires straight to the Nano, without header pins, so it sits flat. Use these connections:
+          <table style="margin:6px 0 4px">
+            <tr><th>From</th><th>To Nano</th></tr>
+            <tr><td>Reed sensor wire 1</td><td><code>D2</code></td></tr>
+            <tr><td>Reed sensor wire 2</td><td><code>GND</code></td></tr>
+            <tr><td>Buzzer +</td><td><code>D8</code></td></tr>
+            <tr><td>Buzzer −</td><td><code>GND</code></td></tr>
+          </table>
+        </li>
+        <li>Slide the Nano onto the rails, USB end first, so its port lines up with the hole in the end wall.</li>
+        <li>Press the buzzer into the ring under the lid, facing the grille holes.</li>
+        <li>Drop the sensor cable into the slot in the other end wall, then press the lid on. It's a friction fit.</li>
+        <li>Stick the box to the wall or the back of the tank with a Command strip or foam tape. Mount it up off the floor, away from splashes.</li>
+      </ol>
+    </section>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <h2>3 · Wiring</h2>
+      <svg viewBox="0 0 640 330" width="100%" role="img" aria-label="Wiring diagram: reed sensor to D2 and GND, buzzer to D8 and GND, USB power">
+        <defs><style>
+          .box{fill:var(--card);stroke:var(--ink);stroke-width:1.5}
+          .nano{fill:#1f7a4d;stroke:#155c39;stroke-width:1.5}
+          .w{fill:none;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+          .pin{fill:#d4af37}
+          .lbl{font-size:13px;font-weight:600}
+          .sm{font-size:11px;fill:var(--muted)}
+          .wt{fill:#fff;font-size:12px;font-weight:600}
+        </style></defs>
+        <!-- Nano -->
+        <rect class="nano" x="235" y="60" width="170" height="190" rx="8"/>
+        <text class="wt" x="320" y="150" text-anchor="middle">Arduino Nano</text>
+        <rect x="300" y="250" width="40" height="18" rx="3" fill="#bbb"/>
+        <text class="wt" x="249" y="98">D2</text>
+        <text class="wt" x="249" y="148" style="display:none"></text>
+        <text class="wt" x="249" y="198">GND</text>
+        <text class="wt" x="391" y="98" text-anchor="end">D8</text>
+        <text class="wt" x="391" y="198" text-anchor="end">GND</text>
+        <circle class="pin" cx="235" cy="94" r="5"/><circle class="pin" cx="235" cy="194" r="5"/>
+        <circle class="pin" cx="405" cy="94" r="5"/><circle class="pin" cx="405" cy="194" r="5"/>
+        <!-- Reed sensor -->
+        <rect class="box" x="30" y="105" width="110" height="80" rx="8"/>
+        <line x1="55" y1="155" x2="80" y2="155" stroke="var(--ink)" stroke-width="2"/>
+        <line x1="80" y1="155" x2="108" y2="140" stroke="var(--ink)" stroke-width="2"/>
+        <line x1="110" y1="155" x2="125" y2="155" stroke="var(--ink)" stroke-width="2"/>
+        <circle cx="80" cy="155" r="2.5" fill="var(--ink)"/><circle cx="110" cy="155" r="2.5" fill="var(--ink)"/>
+        <text class="lbl" x="85" y="128" text-anchor="middle">Reed sensor</text>
+        <text class="sm" x="85" y="205" text-anchor="middle">at the valve · no polarity</text>
+        <text class="sm" x="85" y="220" text-anchor="middle">1–2 m two-core cable</text>
+        <path class="w" stroke="#f2c200" d="M140 130 H190 Q200 130 200 120 V104 Q200 94 210 94 H230"/>
+        <path class="w" stroke="#333" d="M140 165 H190 Q200 165 200 175 V184 Q200 194 210 194 H230"/>
+        <!-- Buzzer -->
+        <circle class="box" cx="545" cy="145" r="45"/>
+        <circle cx="545" cy="145" r="8" fill="var(--ink)"/>
+        <text class="lbl" x="545" y="212" text-anchor="middle">12 mm passive buzzer</text>
+        <text class="sm" x="545" y="227" text-anchor="middle">in the lid ring</text>
+        <text class="lbl" x="512" y="122">+</text><text class="lbl" x="512" y="178">−</text>
+        <path class="w" stroke="#d62828" d="M410 94 H460 Q470 94 470 104 V108 Q470 118 480 118 H505"/>
+        <path class="w" stroke="#333" d="M410 194 H460 Q470 194 470 184 V182 Q470 172 480 172 H505"/>
+        <!-- USB -->
+        <path class="w" stroke="#9aa0a8" d="M320 268 V300 H420"/>
+        <rect class="box" x="420" y="285" width="130" height="32" rx="6"/>
+        <text class="lbl" x="485" y="306" text-anchor="middle">5 V USB adapter</text>
+      </svg>
+    </section>
+    <section class="card">
+      <h2>Wiring notes</h2>
+      <ol>
+        <li><b>No resistors needed.</b> The code turns on the Nano's internal pull-up on D2, so the reed switch goes straight between D2 and GND.</li>
+        <li>The reed switch has no polarity, so its two wires can go either way round.</li>
+        <li>The buzzer <b>does</b> have polarity. The <b>+</b> leg (the longer one, or marked "+") goes to D8.</li>
+        <li>The Nano has two GND pins, one on each row. Use one for the sensor and the other for the buzzer.</li>
+        <li>Extend the sensor's leads with 1–2 m of thin two-core wire to reach the box. Solder the joints and cover them with heat-shrink, since this is a damp room.</li>
+        <li>Power comes from the USB cable and a phone charger. Nothing else connects to the Nano.</li>
+      </ol>
+    </section>
+  </div>
+
+  <section class="card" style="margin-bottom:22px">
+    <h2>Parts list</h2>
+    <table>
+      <tr><th>Qty</th><th>Part</th><th>Notes</th><th>≈ Price</th></tr>
+      <tr><td>1</td><td><a href="https://www.amazon.com/s?k=arduino+nano+usb-c+without+headers" target="_blank" rel="noopener">Arduino Nano (or clone)</a></td><td>USB-C or Mini-B. Get one without headers soldered on, or desolder them.</td><td>$5–8</td></tr>
+      <tr><td>1</td><td><a href="https://www.amazon.com/s?k=MC-38+wired+magnetic+door+sensor+reed+switch" target="_blank" rel="noopener">Wired magnetic door sensor (MC-38 style)</a></td><td>Only the sensor half is used. Sensor body about 27 × 14 × 8 mm.</td><td>$2</td></tr>
+      <tr><td>1</td><td><a href="https://www.amazon.com/s?k=6x3mm+neodymium+disc+magnet+N52" target="_blank" rel="noopener">6 × 3 mm neodymium disc magnet (N52)</a></td><td>Goes in the lever cap. Usually sold in packs.</td><td>$5/pack</td></tr>
+      <tr><td>1</td><td><a href="https://www.amazon.com/s?k=12mm+passive+buzzer+5V" target="_blank" rel="noopener">12 mm passive buzzer, 5 V</a></td><td><i>Passive</i>, because the code plays tones with <code>tone()</code></td><td>$1</td></tr>
+      <tr><td>1–2 m</td><td><a href="https://www.amazon.com/s?k=22+awg+2+conductor+wire" target="_blank" rel="noopener">Two-core wire, 22–26 AWG</a></td><td>Runs from the sensor to the box</td><td>$3</td></tr>
+      <tr><td>1</td><td>USB cable and 5 V USB wall adapter</td><td>An old phone charger works</td><td>—</td></tr>
+      <tr><td>2+</td><td><a href="https://www.amazon.com/s?k=small+zip+ties+4+inch" target="_blank" rel="noopener">Small zip ties, ≤ 4.8 mm wide</a></td><td>Hold the cradle to the supply line</td><td>$3</td></tr>
+      <tr><td>—</td><td>Superglue or epoxy</td><td>Holds the magnet in the cap, and the cap on the lever</td><td>$4</td></tr>
+      <tr><td>—</td><td><a href="https://www.amazon.com/s?k=heat+shrink+tubing+kit" target="_blank" rel="noopener">Heat-shrink tubing</a></td><td>Covers the soldered wire joints</td><td>$3</td></tr>
+      <tr><td>1</td><td>Command strip or double-sided foam tape</td><td>Mounts the box</td><td>$3</td></tr>
+      <tr><td>—</td><td>PETG or PLA filament</td><td>About 30 g for all the parts</td><td>—</td></tr>
+    </table>
+    <p class="sub" style="margin:10px 0 0">Tools: 3D printer, soldering iron, flush cutters. Total parts cost is about $25–35. The links go to Amazon searches rather than specific listings. Check that the sensor body is about 27 × 14 × 8 mm and that the buzzer says <b>passive</b>.</p>
+  </section>
+
+  <section class="card">
+    <h2>Print settings</h2>
+    <table>
+      <tr><th>File</th><th>Orientation</th><th>Notes</th></tr>
+      <tr><td><code>lever_cap_*.stl</code></td><td>Magnet end down (as exported)</td><td>PETG preferred, 100% infill, no supports</td></tr>
+      <tr><td><code>sensor_cradle.stl</code></td><td>Standing upright (as exported)</td><td>PETG, no supports. The 14.6 mm pocket roof bridges fine.</td></tr>
+      <tr><td><code>enclosure_base.stl</code></td><td>Open side up</td><td>PLA or PETG, 0.2 mm layers, no supports</td></tr>
+      <tr><td><code>enclosure_lid.stl</code></td><td>Flat face down</td><td>No supports</td></tr>
+    </table>
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="assembly_data.js"></script>
+<script>
+const A = window.ASM;
+function geo(d) {
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(d.v, 3));
+  g.setIndex(d.f); g.computeVertexNormals(); return g;
+}
+function mesh(d, color, opts={}) {
+  const m = new THREE.Mesh(geo(d), new THREE.MeshStandardMaterial(Object.assign({color, metalness:0.15, roughness:0.55, flatShading:false}, opts)));
+  return m;
+}
+function makeViewer(el, target, camPos) {
+  const r = new THREE.WebGLRenderer({antialias:true, alpha:true});
+  r.setPixelRatio(Math.min(devicePixelRatio, 2));
+  el.prepend(r.domElement);
+  const s = new THREE.Scene();
+  const c = new THREE.PerspectiveCamera(35, 1, 1, 2000);
+  c.up.set(0,0,1); c.position.set(...camPos);
+  s.add(new THREE.HemisphereLight(0xffffff, 0x777788, 0.85));
+  const d = new THREE.DirectionalLight(0xffffff, 0.7); d.position.set(-80,-120,160); s.add(d);
+  const ctl = new THREE.OrbitControls(c, r.domElement); ctl.target.set(...target); ctl.enableDamping = true; ctl.update();
+  function size() { const w = el.clientWidth, h = el.clientHeight; r.setSize(w, h, false); c.aspect = w/h; c.updateProjectionMatrix(); }
+  new ResizeObserver(size).observe(el); size();
+  return {r, s, c, ctl};
+}
+const METAL = {color:0xb9bec6, metalness:0.75, roughness:0.3};
+const PRINT = 0xf08a24, PRINT2 = 0xf5b041;
+
+// ---------- Viewer 1: valve
+const V1 = makeViewer(document.getElementById('v1'), [0,-8,-35], [-120,-170,30]);
+V1.s.add(mesh(A.valve, METAL.color, {metalness:0.25, roughness:0.35}));
+V1.s.add(mesh(A.pipe, 0x9aa0a8, {metalness:0.2, roughness:0.5}));
+V1.s.add(mesh(A.hose, 0x9aa0a8, {metalness:0.2, roughness:0.5}));
+const tank = new THREE.Mesh(new THREE.BoxGeometry(140, 70, 6), new THREE.MeshStandardMaterial({color:0xf4f1ea}));
+tank.position.set(0, 10, 45); V1.s.add(tank);
+const leverGroup = new THREE.Group();
+leverGroup.add(mesh(A.lever, 0xd0d4da, {metalness:0.3, roughness:0.3}));
+leverGroup.add(mesh(A.cap, PRINT));
+leverGroup.add(mesh(A.magnet, 0x3b6fd8));
+V1.s.add(leverGroup);
+V1.s.add(mesh(A.cradle, PRINT2));
+V1.s.add(mesh(A.sensor, 0xf2f2f2));
+// zip ties
+[0.25, 0.75].forEach(t => {
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(11, 0.9, 8, 40), new THREE.MeshStandardMaterial({color:0x111111}));
+  ring.scale.set(1, 1.05, 1);
+  ring.position.set(0, -8.5, A.meta.sensorTop - 30.8 + 2 + 27.6*t + 1.5);
+  V1.s.add(ring);
+});
+let leverTarget = 0, leverAngle = 0;
+function setKnob(open) {
+  leverTarget = open ? -Math.PI/2 : 0;
+  document.getElementById('bOpen').classList.toggle('on', open);
+  document.getElementById('bClosed').classList.toggle('on', !open);
+  const st = document.getElementById('state');
+  st.textContent = open ? 'Magnet moved away → 10-min timer starts' : 'Magnet next to sensor → OK';
+  st.classList.toggle('alarm', open);
+}
+document.getElementById('bOpen').onclick = () => setKnob(true);
+document.getElementById('bClosed').onclick = () => setKnob(false);
+
+// ---------- Viewer 2: enclosure
+const V2 = makeViewer(document.getElementById('v2'), [0,0,20], [-90,-120,90]);
+const base = mesh(A.base, PRINT), lid = mesh(A.lid, PRINT, {transparent:true, opacity:0.92});
+const nano = mesh(A.nano, 0x1f7a4d), buzzer = mesh(A.buzzer, 0x222222);
+// lid STL is modelled flat-face-down; flip it onto the box
+const lidGroup = new THREE.Group(); lidGroup.add(lid);
+lid.rotation.x = Math.PI; lid.position.z = 0;
+V2.s.add(base, nano, buzzer, lidGroup);
+const H = A.meta.lidZ;
+// ---- wires (Nano clone pinout: D-pin row on +y side, USB toward -x)
+const FZ = 2, PCB_TOP = FZ + 4.6, NANO_X0 = -29.5, BX = 12;
+const pinX = i => NANO_X0 + 3.8 + (i - 1) * 2.54;   // i = pin number counted from the USB end
+const PINS = { D8: [pinX(5), 7.62], D2: [pinX(11), 7.62], GND_D: [pinX(12), 7.62], GND_A: [pinX(14), -7.62] };
+const WIRE = { yellow:0xf2c200, black:0x1a1a1a, red:0xd62828, white:0xeeeeee };
+const wireGroup = new THREE.Group(); V2.s.add(wireGroup);
+const pinMarks = new THREE.Group(); nano.add(pinMarks);
+Object.values(PINS).forEach(([x, y]) => {
+  const p = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.75, 1.6, 12), new THREE.MeshStandardMaterial({color:0xd4af37, metalness:0.6, roughness:0.3}));
+  p.rotation.x = Math.PI / 2; p.position.set(x, y, PCB_TOP + 0.8); pinMarks.add(p);
+});
+// buzzer legs
+[-3.25, 3.25].forEach(y => {
+  const l = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 3, 8), new THREE.MeshStandardMaterial({color:0xcccccc}));
+  l.rotation.x = Math.PI / 2; l.position.set(BX, y, H - 9.5 - 1.5); buzzer.add(l);
+});
+function wire(points, color) {
+  const curve = new THREE.CatmullRomCurve3(points.map(p => new THREE.Vector3(...p)), false, 'catmullrom', 0.3);
+  return new THREE.Mesh(new THREE.TubeGeometry(curve, 48, 0.55, 8, false), new THREE.MeshStandardMaterial({color, roughness:0.6}));
+}
+function buildWires(e) {
+  wireGroup.children.forEach(m => m.geometry.dispose());
+  wireGroup.clear();
+  const nz = PCB_TOP + 1.6 + e * 14;                 // top of solder joint
+  const bz = H - 9.5 - 2 - 3 + e * 45;               // buzzer leg tips
+  const pin = k => PINS[k];
+  // Buzzer: D8 -> +,  GND -> -
+  wireGroup.add(wire([[...pin('D8'), nz], [pin('D8')[0], pin('D8')[1], nz + 6], [BX - 6, 3.25, (nz + bz) / 2 + 2], [BX, 3.25, bz - 3], [BX, 3.25, bz]], WIRE.red));
+  wireGroup.add(wire([[...pin('GND_A'), nz], [pin('GND_A')[0], pin('GND_A')[1], nz + 6], [BX - 3, -3.25, (nz + bz) / 2], [BX, -3.25, bz - 3], [BX, -3.25, bz]], WIRE.black));
+  // Reed sensor cable: D2 + GND -> out through the slot in the +x wall
+  const sz = FZ + 14;
+  wireGroup.add(wire([[...pin('D2'), nz], [pin('D2')[0], pin('D2')[1], nz + 5], [18, 4, sz], [29, 0.6, sz], [44, 0.6, sz], [60, 6, sz - 10]], WIRE.yellow));
+  wireGroup.add(wire([[...pin('GND_D'), nz], [pin('GND_D')[0], pin('GND_D')[1], nz + 4], [19, 2, sz], [29, -0.6, sz], [44, -0.6, sz], [60, 4.8, sz - 10]], WIRE.black));
+  // USB power cable plugged into the Nano
+  const uz = FZ + 6.6 + e * 14;
+  wireGroup.add(wire([[-29, 0, uz], [-38, 0, uz], [-55, 0, uz - 2], [-68, -8, uz - 12]], WIRE.white));
+  const plug = new THREE.Mesh(new THREE.BoxGeometry(14, 9, 7), new THREE.MeshStandardMaterial({color:0x2b2b2b}));
+  plug.position.set(-38, 0, uz); wireGroup.add(plug);
+}
+function explode(e) {
+  lidGroup.position.z = H + 2 + e*45;
+  buzzer.position.z = e*45 - 2;        // buzzer rides in the lid's ring
+  nano.position.z = e*14;
+  buildWires(e);
+}
+const ex = document.getElementById('explode');
+ex.oninput = () => explode(+ex.value); explode(+ex.value);
+
+(function loop() {
+  leverAngle += (leverTarget - leverAngle) * 0.12;
+  leverGroup.position.set(0, 0, 0);
+  leverGroup.rotation.y = leverAngle;
+  V1.ctl.update(); V1.r.render(V1.s, V1.c);
+  V2.ctl.update(); V2.r.render(V2.s, V2.c);
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
