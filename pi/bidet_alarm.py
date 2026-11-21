@@ -7,7 +7,7 @@ Hardware (no extra parts):
                                G  -> Pi pin 6  (GND)
                                D0 -> Pi pin 11 (GPIO17)
                                A0 -> not used
-  Magnet on the valve lever. Speaker/headphones on the 3.5 mm jack (or HDMI/Bluetooth audio).
+  Magnet on the valve lever. Speaker on the 3.5 mm jack, or a USB speaker (set AUDIO_DEVICE).
 
 Usage:
   python3 bidet_alarm.py --calibrate     # prints the sensor reading live; use it to set up
@@ -41,6 +41,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CUSTOM_SOUND = os.path.join(HERE, "alarm.wav")   # drop your own recording here to use it
 BEEP_SOUND = os.path.join(HERE, ".beep.wav")
 NTFY_TOPIC = os.environ.get("NTFY_TOPIC", "")
+# Audio output. Empty = system default. For a USB speaker that plays over USB, find its card
+# name with `aplay -L | grep -i usb` and set e.g. AUDIO_DEVICE=plughw:CARD=Device,DEV=0
+AUDIO_DEVICE = os.environ.get("AUDIO_DEVICE", "")
 
 
 def make_beep(path):
@@ -60,7 +63,8 @@ def make_beep(path):
 
 def play_alarm():
     sound = CUSTOM_SOUND if os.path.exists(CUSTOM_SOUND) else BEEP_SOUND
-    subprocess.run(["aplay", "-q", sound], check=False)
+    cmd = ["aplay", "-q"] + (["-D", AUDIO_DEVICE] if AUDIO_DEVICE else []) + [sound]
+    subprocess.run(cmd, check=False)
 
 
 def notify(msg):

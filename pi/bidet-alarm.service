@@ -13,6 +13,8 @@ WorkingDirectory=/home/pi/bidet-alarm/pi
 ExecStart=/usr/bin/python3 /home/pi/bidet-alarm/pi/bidet_alarm.py
 Environment=MAGNET_NEAR_VALUE=0
 # Environment=NTFY_TOPIC=pick-a-long-random-name-here
+# USB speaker (find the name with: aplay -L | grep -i usb)
+# Environment=AUDIO_DEVICE=plughw:CARD=Device,DEV=0
 Restart=always
 
 [Install]
