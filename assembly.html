@@ -56,6 +56,8 @@
         <span><i class="sw" style="background:#f5b041"></i>Sensor cradle (printed)</span>
         <span><i class="sw" style="background:#3b6fd8"></i>Magnet</span>
         <span><i class="sw" style="background:#f2f2f2;border:1px solid #bbb"></i>Reed sensor</span>
+        <span><i class="sw" style="background:#f2c200"></i>Sensor cable (D2)</span>
+        <span><i class="sw" style="background:#1a1a1a;border:1px solid #666"></i>Sensor cable (GND)</span>
       </div>
     </section>
     <section class="card">
@@ -68,6 +70,7 @@
         <li>With the knob <b>closed</b>, hold the cradle against the supply line under the lever tip. Its V-groove goes against the hose.</li>
         <li>Slide it up until there's a <b>3–5 mm gap</b> to the magnet. Then loop 2 zip ties through the channels, around both the sensor and the hose, and tighten.</li>
         <li>Open the knob and check that the lever swings clear of the cradle.</li>
+        <li>Run the sensor cable (yellow = D2, black = GND) down along the supply line, zip-tie it once more, then route it along the wall to the alarm box.</li>
       </ol>
     </section>
   </div>
@@ -233,7 +236,7 @@ const METAL = {color:0xb9bec6, metalness:0.75, roughness:0.3};
 const PRINT = 0xf08a24, PRINT2 = 0xf5b041;
 
 // ---------- Viewer 1: valve
-const V1 = makeViewer(document.getElementById('v1'), [0,-8,-35], [-120,-170,30]);
+const V1 = makeViewer(document.getElementById('v1'), [24,-5,-50], [-120,-190,-5]);
 V1.s.add(mesh(A.valve, METAL.color, {metalness:0.25, roughness:0.35}));
 V1.s.add(mesh(A.pipe, 0x9aa0a8, {metalness:0.2, roughness:0.5}));
 V1.s.add(mesh(A.hose, 0x9aa0a8, {metalness:0.2, roughness:0.5}));
@@ -253,6 +256,30 @@ V1.s.add(mesh(A.sensor, 0xf2f2f2));
   ring.position.set(0, -8.5, A.meta.sensorTop - 30.8 + 2 + 27.6*t + 1.5);
   V1.s.add(ring);
 });
+// sensor cable: two-core (yellow = D2, black = GND) out of the cradle's bottom slot,
+// down along the supply line (zip-tied), then along the wall to the alarm box
+(function sensorCable() {
+  const sy = A.meta.leverY, zb = A.meta.sensorTop - 30.8;   // sensor centre y, cradle bottom z
+  const path = off => [
+    [off, sy, zb + 4], [off, sy, zb - 2], [off * 0.6, -7.5, zb - 14], [off * 0.6, -6.5, -80],
+    [off * 0.6 + 4, -6, -96], [22, 6 + off * 0.6, -104], [60, 22 + off * 0.6, -100], [95, 30 + off * 0.6, -70]
+  ];
+  [[-0.9, 0xf2c200], [0.9, 0x1a1a1a]].forEach(([off, color]) => {
+    const curve = new THREE.CatmullRomCurve3(path(off).map(p => new THREE.Vector3(...p)), false, 'catmullrom', 0.35);
+    V1.s.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 120, 1.0, 8, false), new THREE.MeshStandardMaterial({color, roughness:0.6})));
+  });
+  // extra zip tie holding the cable to the supply line
+  const tie = new THREE.Mesh(new THREE.TorusGeometry(7.5, 0.8, 8, 32), new THREE.MeshStandardMaterial({color:0x111111}));
+  tie.scale.set(1, 1.05, 1); tie.position.set(0, -1.5, -70); V1.s.add(tie);
+  // label
+  const cv = document.createElement('canvas'); cv.width = 360; cv.height = 90;
+  const g = cv.getContext('2d');
+  g.fillStyle = 'rgba(20,20,24,0.85)'; g.beginPath(); g.roundRect(0, 0, 360, 90, 18); g.fill();
+  g.fillStyle = '#fff'; g.font = '600 34px -apple-system, sans-serif'; g.fillText('→ to alarm box', 22, 44);
+  g.fillStyle = '#c8c8cc'; g.font = '24px -apple-system, sans-serif'; g.fillText('yellow D2 · black GND', 22, 76);
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({map: new THREE.CanvasTexture(cv), depthTest:false}));
+  sp.scale.set(52, 13, 1); sp.position.set(88, 30, -54); V1.s.add(sp);
+})();
 let leverTarget = 0, leverAngle = 0;
 function setKnob(open) {
   leverTarget = open ? -Math.PI/2 : 0;

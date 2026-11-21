@@ -78,6 +78,7 @@ You don't need any resistors, because the sketch turns on the Nano's internal pu
 2. Put the reed sensor in the cradle, with its wires coming out of the bottom slot.
 3. With the knob **closed**, hold the cradle's V-groove against the supply line. Slide it up until it's 3–5 mm below the magnet, then zip-tie it through the two channels.
 4. Open the knob and check that the lever swings clear of the cradle.
+5. Run the sensor cable (yellow = D2, black = GND) down the supply line, zip-tie it once more, then route it along the wall to the box.
 
 **The box**
 
