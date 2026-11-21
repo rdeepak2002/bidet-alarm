@@ -64,6 +64,29 @@ def ky024_holder():
 
 holder = ky024_holder()
 
+
+# ------------------------------------------------------------------ cover (splash / condensation / bump protection)
+COVER_WALL = 1.6
+ROOF = 0.8           # plastic over the Hall sensor - magnetic field passes straight through
+COMP_H = 10.0        # tallest part on the board's front (the threshold potentiometer)
+
+
+def ky024_cover():
+    xi = xo + rail + 0.25                       # slides over the holder with 0.25 mm clearance
+    yi = y_f - COMP_H                           # inside front face
+    z_roof = sensor_face_z                      # roof underside touches the Hall sensor face
+    shell = box(-xi - COVER_WALL, yi - COVER_WALL, tray_bot + 2, xi + COVER_WALL, y_back, z_roof + ROOF)
+    shell -= box(-xi, yi, tray_bot, xi, y_back + 1, z_roof)          # open back (hose side) and bottom (cable, drainage)
+    shell -= cyl(4.0, 20, 24).rotate([90, 0, 0]).translate([0, yi + 5, tray_bot + 16.5])   # screwdriver hole for the threshold pot
+    for zc in (tray_bot + 8, tray_top - 8):                         # zip ties pass through the sides, into the tunnels
+        shell -= box(-xi - COVER_WALL - 1, y_b + 0.6, zc - 2.8, xi + COVER_WALL + 1, y_b + 3.0, zc + 2.8)
+    # recess for the coupling nut above (cover top sits just below it); Hall sensor stays covered
+    shell -= cyl(g["NUT_D"] + 1.0, 30).translate([0, 0, sensor_face_z - 2])
+    return shell
+
+
+cover = ky024_cover()
+
 # reference KY-024 board for the viewer
 board = box(-KY_W / 2, y_f, tray_bot + 1.5, KY_W / 2, y_b, pcb_top_z)
 board_parts = box(-4, y_f - 9, tray_bot + 12, 4, y_f, tray_bot + 21)           # potentiometer
@@ -75,6 +98,8 @@ pins = box(-4, y_f + 0.2, tray_bot - 6, 4, y_b - 0.2, tray_bot + 1.5)
 # exports (print orientation: standing upright on z = 0)
 save = lambda m, name: to_trimesh(m).export(os.path.join(OUT, name))
 save(holder.translate([0, 0, -tray_bot]), "ky024_holder.stl")
+cv = cover.rotate([90, 0, 0])                    # front face down on the bed: no supports needed
+save(cv.translate([0, 0, -cv.bounding_box()[2]]), "ky024_cover.stl")
 for b in g["LEVER_BORES"]:
     save(g["lever_cap"](b)[0], f"lever_cap_{b:.1f}mm.stl")
 
@@ -86,7 +111,7 @@ def pack(m):
 
 data = {k: pack(v) for k, v in {
     "valve": g["valve"], "pipe": g["pipe"], "lever": g["lever"], "cap": g["cap_asm"], "magnet": g["magnet"],
-    "holder": holder, "board": board, "boardParts": board_parts, "hall": hall + legs, "pins": pins}.items()}
+    "holder": holder, "cover": cover, "board": board, "boardParts": board_parts, "hall": hall + legs, "pins": pins}.items()}
 data["meta"] = {"leverY": LEVER_Y, "magnetZ": magnet_z, "sensorZ": sensor_face_z, "trayBot": tray_bot,
                 "trayTop": tray_top, "yBack": y_back, "yB": y_b}
 with open(os.path.join(HERE, "pi_assembly_data.js"), "w") as f:
@@ -99,5 +124,11 @@ print("holder vs supply line   ", round(v(holder ^ g["pipe"]), 2), "mm^3")
 print("holder vs board         ", round(v(holder ^ board), 2), "mm^3")
 worst = max(v((g["lever"] + g["cap_asm"]).rotate([0, -a, 0]) ^ (holder + board + hall)) for a in range(0, 91, 5))
 print("lever swing vs holder   ", round(worst, 2), "mm^3")
+print("cover vs holder         ", round(v(cover ^ holder), 2), "mm^3")
+print("cover vs board+parts+hall", round(v(cover ^ (board + board_parts + hall + legs)), 2), "mm^3")
+print("cover vs valve/pipe     ", round(v(cover ^ (g["valve"] + g["pipe"])), 2), "mm^3")
+worst_c = max(v((g["lever"] + g["cap_asm"]).rotate([0, -a, 0]) ^ cover) for a in range(0, 91, 5))
+print("lever swing vs cover    ", round(worst_c, 2), "mm^3")
+print(f"magnet face -> cover roof clearance = {magnet_z - (sensor_face_z + ROOF):.1f} mm")
 print(f"magnet face z={magnet_z:.1f}  sensor face z={sensor_face_z:.1f}  gap={magnet_z - sensor_face_z:.1f} mm")
 print(f"holder size: {2 * (xo + rail):.1f} x {y_back - (y_f - 2):.1f} x {H:.1f} mm")

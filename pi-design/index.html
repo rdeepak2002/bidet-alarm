@@ -59,10 +59,12 @@
         <button id="bClosed" class="on">Knob closed</button>
         <button id="bOpen">Knob open</button>
         <span class="badge" id="state">Magnet 3 mm above sensor → OK</span>
+        <button id="bCover" class="on">Cover on</button>
       </div>
       <div class="legend">
         <span><i class="sw" style="background:#f08a24"></i>Lever cap (printed)</span>
         <span><i class="sw" style="background:#f5b041"></i>KY-024 holder (printed)</span>
+        <span><i class="sw" style="background:#e9e4d8;border:1px solid #bbb"></i>Cover (printed)</span>
         <span><i class="sw" style="background:#3b6fd8"></i>2× 6×2 mm magnets</span>
         <span><i class="sw" style="background:#1f6fb2"></i>KY-024 board</span>
         <span><i class="sw" style="background:#d62828"></i>3.3 V</span>
@@ -80,6 +82,8 @@
         <li>After 10 minutes, the Pi plays the alarm on the <b>USB speaker</b> every 30 s until the valve is closed. It can also send a <b>phone notification</b>.</li>
       </ol>
       <div class="note">The field figures are calculated, not measured. The desk test (Phase 1) confirms them before you print anything.</div>
+      <h3>Is it safe?</h3>
+      <p style="margin:0">Yes, for people. The sensor runs at 3.3 V and draws a few mA, so there's no shock or fire risk. A bare board <i>is</i> exposed to splashes and to condensation on the cold supply line, which can cause corrosion or false readings. That's what the printed <b>cover</b> is for. It shields the board from splashes and bumps, and the Hall sensor sits under a 0.8 mm plastic roof that magnetic fields pass straight through. The bottom stays open so the cable can exit and water drains out. For extra protection, brush clear nail polish over the board's solder joints. Keep the Pi itself in a case somewhere dry.</p>
     </section>
   </div>
 
@@ -178,7 +182,9 @@
       <li><input type="checkbox"><span>Print the 4 <code>lever_cap_*.stl</code> sizes and keep the snug one. Glue the 2 magnets into its pocket, <b>with the same face toward the sensor as in the desk test</b>.</span></li>
       <li><input type="checkbox"><span>Print <code>ky024_holder.stl</code>, standing upright with no supports. Slide the board in from the top, sensor end up and header pins down.</span></li>
       <li><input type="checkbox"><span>Bend the Hall sensor's legs so its flat face points straight up at the magnet.</span></li>
-      <li><input type="checkbox"><span>Fit the cap on the lever with its <b>flat side toward the valve</b>. Hold the holder against the supply line with a <b>3 mm gap</b>, check the LED, then zip-tie it through the two tunnels.</span></li>
+      <li><input type="checkbox"><span>Print <code>ky024_cover.stl</code> with its front face down and no supports.</span></li>
+      <li><input type="checkbox"><span>Fit the cap on the lever with its <b>flat side toward the valve</b>. Hold the holder against the supply line with a <b>3 mm gap</b> and check the LED.</span></li>
+      <li><input type="checkbox"><span>Slide the <b>cover</b> over the holder. Run 2 zip ties through the slots in the cover's sides, through the holder's tunnels and around the hose, then tighten. If you need to adjust the threshold again, reach the screw through the hole in the cover's front.</span></li>
       <li><input type="checkbox"><span>Turn the knob open and closed a few times. The LED should follow it every time, and the lever should clear the holder.</span></li>
     </ul>
 
@@ -209,6 +215,7 @@
         <tr><th>File</th><th>Notes</th></tr>
         <tr><td><code>lever_cap_5.6mm … 6.8mm.stl</code></td><td>Magnet end down. PETG, 100% infill. The pocket fits two 6×2 magnets.</td></tr>
         <tr><td><code>ky024_holder.stl</code></td><td>Upright, no supports. PETG. 20 × 12 × 35 mm.</td></tr>
+        <tr><td><code>ky024_cover.stl</code></td><td>Front face down, no supports. PETG. Has a screwdriver hole for the threshold screw.</td></tr>
       </table>
       <div class="note">The KY-024 holder uses <b>typical</b> board sizes (38 × 15 mm). Measure your board first. Change <code>KY_L</code>, <code>KY_W</code> and <code>SENSOR_ABOVE_PCB</code> in <code>pi_parts.py</code> to match, then run it again.</div>
       <h3>Pi vs Nano</h3>
@@ -269,6 +276,8 @@ const tank = new THREE.Mesh(new THREE.BoxGeometry(140, 70, 6), new THREE.MeshSta
 const lever = new THREE.Group();
 lever.add(mesh(A.lever, 0xd0d4da, { metalness: 0.3, roughness: 0.3 }), mesh(A.cap, 0xf08a24), mesh(A.magnet, 0x3b6fd8));
 S.add(lever);
+const coverMesh = mesh(A.cover, 0xe9e4d8, { transparent: true, opacity: 0.55, depthWrite: false }); S.add(coverMesh);
+document.getElementById('bCover').onclick = e => { coverMesh.visible = !coverMesh.visible; e.target.classList.toggle('on', coverMesh.visible); e.target.textContent = coverMesh.visible ? 'Cover on' : 'Cover off'; };
 S.add(mesh(A.holder, 0xf5b041), mesh(A.board, 0x1f6fb2), mesh(A.boardParts, 0x2b5fa8), mesh(A.hall, 0x222222), mesh(A.pins, 0xd4af37, { metalness: 0.6 }));
 // zip ties through the tunnels and around the hose
 [M.trayBot + 8, M.trayTop - 8].forEach(z => {
