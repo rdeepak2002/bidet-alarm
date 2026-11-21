@@ -159,6 +159,18 @@
     <div class="progress"><div id="bar"></div></div>
     <p class="sub" style="margin:4px 0 8px">Checkboxes are saved in this browser.</p>
 
+    <div class="phase">Phase 0 · Flash the microSD card (about 10 min, on the Mac)</div>
+    <ul class="check">
+      <li><input type="checkbox"><span>Put the microSD card in the Mac and open <b>Raspberry Pi Imager</b> (already installed).</span></li>
+      <li><input type="checkbox"><span><b>Device:</b> Raspberry Pi 4. <b>OS:</b> Raspberry Pi OS (other) → <b>Raspberry Pi OS Lite (64-bit)</b>. It has no desktop, so it boots faster and suits a Pi with no screen. <b>Storage:</b> the microSD card. Double-check the size so you don't pick another drive.</span></li>
+      <li><input type="checkbox"><span><b>Hostname:</b> <code>bidet-alarm</code>. <b>Time zone:</b> America/Los_Angeles, <b>keyboard:</b> us.</span></li>
+      <li><input type="checkbox"><span><b>Username:</b> <code>pi</code>, with a password you choose and type yourself.</span></li>
+      <li><input type="checkbox"><span><b>Wi-Fi:</b> your home network's name, its password (you type it), and <b>country: US</b>. The Pi then joins your network automatically on every boot.</span></li>
+      <li><input type="checkbox"><span><b>Remote access:</b> enable <b>SSH</b> with <b>public-key authentication</b>. To paste your key, run <code>pbcopy &lt; ~/.ssh/id_ed25519.pub</code> in Terminal, then paste it into Imager. Skip Raspberry Pi Connect.</span></li>
+      <li><input type="checkbox"><span>Click <b>Write</b> and confirm erasing the card. When it finishes, eject the card and put it in the Pi.</span></li>
+      <li><input type="checkbox"><span>Power on the Pi and wait about 3 minutes. Then run <code>./pi/setup_from_mac.sh</code> on the Mac. It finds <code>bidet-alarm.local</code>, checks SSH and Wi-Fi, copies the project over and installs what the alarm needs. After that, <code>ssh bidet-alarm</code> logs you straight in.</span></li>
+    </ul>
+
     <div class="phase">Phase 1 · Desk test (15 min): confirms the magnet and sensor before printing</div>
     <ul class="check">
       <li><input type="checkbox"><span>Wire the KY-024 to the Pi: <b>+ to pin 1</b>, <b>G to pin 6</b>, <b>D0 to pin 11</b>.</span></li>
