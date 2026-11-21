@@ -32,19 +32,22 @@ Open **`assembly.html`** in a browser for the interactive 3D assembly. It has an
 
 | Qty | Part | Notes | ≈ Price |
 |---|---|---|---|
-| 1 | [Arduino Nano (or clone)](https://www.amazon.com/s?k=arduino+nano+usb-c+without+headers) | USB-C or Mini-B, preferably without headers soldered on | $5–8 |
-| 1 | [Wired magnetic door sensor, MC-38 style](https://www.amazon.com/s?k=MC-38+wired+magnetic+door+sensor+reed+switch) | Only the sensor half is used. Body about 27 × 14 × 8 mm. | $2 |
-| 1 | [6 × 3 mm N52 neodymium disc magnet](https://www.amazon.com/s?k=6x3mm+neodymium+disc+magnet+N52) | Goes in the lever cap | $5/pack |
-| 1 | [12 mm passive buzzer, 5 V](https://www.amazon.com/s?k=12mm+passive+buzzer+5V) | Must be *passive*, because the code uses `tone()` | $1 |
-| 1–2 m | [Two-core wire, 22–26 AWG](https://www.amazon.com/s?k=22+awg+2+conductor+wire) | Runs from the sensor to the box | $3 |
-| 1 | USB cable and 5 V USB wall adapter | An old phone charger works | — |
+| 1 | [Arduino Nano clone, USB-C, 3-pack (AYWHP)](https://www.amazon.com/dp/B0DFGX3MSL) | Headers come loose, and a USB-C cable is included | $14 |
+| 1 | [uxcell MC-38 wired door sensor, NC, 2-pack](https://www.amazon.com/dp/B07F5XL9N8) | Only the sensor half is used. Body 27 × 14 × 7.5 mm, 26 cm leads | $10 |
+| 1 | [6 × 3 mm round magnets, 80-pack (rhinocats)](https://www.amazon.com/dp/B0FMP58G7B) | Goes in the lever cap | $7.49 |
+| 1 | [Cylewet 5 V active buzzer, 12 mm, 10-pack](https://www.amazon.com/dp/B01N7NHSY6) | *Active* type, under 25 mA, so it's safe to drive straight from a Nano pin | $6.99 |
+| 10 ft | [Haerkn 22 AWG two-core silicone wire](https://www.amazon.com/dp/B0B9JCJMNP) | Extends the sensor's 26 cm leads to the box | $4.66 |
+| 1 | 5 V USB wall adapter | Any phone charger works. The USB-C cable comes with the Nano. | — |
 | 2+ | [Small zip ties, ≤ 4.8 mm wide](https://www.amazon.com/s?k=small+zip+ties+4+inch) | Hold the cradle to the supply line | $3 |
 | — | Superglue or epoxy | Holds the magnet in the cap | $4 |
 | — | [Heat-shrink tubing](https://www.amazon.com/s?k=heat+shrink+tubing+kit) | Covers the soldered joints | $3 |
 | 1 | Command strip or double-sided foam tape | Mounts the box | $3 |
 | — | PETG or PLA filament | About 30 g in total | — |
 
-The links are Amazon search pages rather than specific listings, because individual listings change often. Before you buy, check that the door sensor's body is close to 27 × 14 × 8 mm and that the buzzer says **passive**.
+The links go to the exact listings this design was checked against. If you substitute parts, keep these the same:
+
+- The door sensor must be **MC-38, NC type**, with a body of about 27 × 14 × 7.5 mm. If yours is sold as NO, set `SENSOR_IS_NO = true` in the firmware.
+- The buzzer must be a **5 V active** buzzer that draws under 30 mA. Most 12 mm "passive" buzzers are 16–42 Ω electromagnetic types. Those draw over 100 mA, which can damage a Nano pin.
 
 **Tools:** 3D printer, soldering iron, flush cutters.
 
@@ -74,9 +77,9 @@ You don't need any resistors, because the sketch turns on the Nano's internal pu
 
 **At the valve**
 
-1. Glue the magnet into the cap's end pocket, then push the cap onto the lever.
+1. Glue the magnet into the cap's end pocket. Push the cap onto the lever with its **flat side facing the valve body**.
 2. Put the reed sensor in the cradle, with its wires coming out of the bottom slot.
-3. With the knob **closed**, hold the cradle's V-groove against the supply line. Slide it up until it's 3–5 mm below the magnet, then zip-tie it through the two channels.
+3. With the knob **closed**, hold the cradle's V-groove against the supply line. Slide it up until it's **2–3 mm** below the magnet. The recess at the top-back lets it ride up in front of the nut. Power the Nano: its built-in LED must be **off** with the knob closed and **on** with it open. Then zip-tie it through the two channels.
 4. Open the knob and check that the lever swings clear of the cradle.
 5. Run the sensor cable (yellow = D2, black = GND) down the supply line, zip-tie it once more, then route it along the wall to the box.
 
@@ -95,11 +98,23 @@ To test, set `ALARM_DELAY` to `10UL * 1000UL` (10 s). Open the knob and it shoul
 
 ## Loudness
 
-A 12 mm passive buzzer is rated at about **80–85 dB at 10 cm**, at its resonant frequency (around 2.3–2.7 kHz). The sketch alternates 2.7 and 2.3 kHz to stay near that peak. In practice, it's easy to hear in the bathroom and the next room, but it's unlikely to carry across the house with doors closed. For a louder alarm:
+The Cylewet active buzzer is rated at about **85 dB at 10 cm**. That's easy to hear in the bathroom and the next room, but probably not across the house with doors closed. The sketch beeps six times in a row and repeats every 30 seconds until the valve is closed. For a louder alarm:
 
-- Use a **larger passive piezo**, 23–30 mm. It's a drop-in swap on D8 and GND.
-- Use a **5 V active piezo siren** (95 dB or more), switched by an NPN transistor or MOSFET on D8.
+- Use a **5 V active piezo siren** (95 dB or more, often 3–24 V), switched by an NPN transistor on D8.
 - Use a **DFPlayer Mini with a 3 W speaker** to play a recorded voice message.
+
+## Design checks
+
+`bidet_alarm_parts.py` builds the assembly. The checks below were run against it, using reference geometry estimated from a video of the valve:
+
+- No collisions between the cap, cradle, sensor, valve, nut and supply line with the knob closed.
+- The lever and cap swing from 0° to 90° without touching the cradle.
+- Closed: 3.3 mm from the magnet face to the sensor body. The sensor is rated to trigger at 10–15 mm with its own larger magnet.
+- Open: 45 mm from the magnet to the sensor, so the switch reliably opens.
+- Box: the Nano, buzzer, rails, ring and lid don't collide, and there's about 4 mm of clearance above the Nano for wires.
+- Firmware compiles for `arduino:avr:nano` (2.5 KB, 8% of flash).
+
+The real valve may differ from these estimates. Print the cap and cradle first and test-fit them.
 
 ## Customising the parts
 

@@ -65,10 +65,10 @@
       <ol>
         <li>Print all four <code>lever_cap_*.stl</code> sizes. Push each onto the lever and keep the one that slides on snugly.</li>
         <li>Press the 6×3 mm magnet into the pocket in the cap's closed end, with a drop of superglue.</li>
-        <li>Slide the cap onto the lever (bonding it with a drop of superglue is optional). The magnet now sits at the lever tip.</li>
+        <li>Slide the cap onto the lever with its <b>flat side facing the valve body</b> (bonding it with a drop of superglue is optional). The magnet now sits at the lever tip.</li>
         <li>Push the reed sensor into the cradle's pocket, with the wires coming out the slot at the bottom.</li>
         <li>With the knob <b>closed</b>, hold the cradle against the supply line under the lever tip. Its V-groove goes against the hose.</li>
-        <li>Slide it up until there's a <b>3–5 mm gap</b> to the magnet. Then loop 2 zip ties through the channels, around both the sensor and the hose, and tighten.</li>
+        <li>Slide it up until there's a <b>2–3 mm gap</b> to the magnet. The recess at the top-back lets it ride up in front of the nut. Check that the Nano's LED is <b>off</b> when closed and <b>on</b> when open. Then loop 2 zip ties through the channels and tighten.</li>
         <li>Open the knob and check that the lever swings clear of the cradle.</li>
         <li>Run the sensor cable (yellow = D2, black = GND) down along the supply line, zip-tie it once more, then route it along the wall to the alarm box.</li>
       </ol>
@@ -85,7 +85,7 @@
       <div class="legend">
         <span><i class="sw" style="background:#f08a24"></i>Base / lid (printed)</span>
         <span><i class="sw" style="background:#1f7a4d"></i>Arduino Nano</span>
-        <span><i class="sw" style="background:#222"></i>12 mm buzzer</span>
+        <span><i class="sw" style="background:#222"></i>5 V active buzzer</span>
         <span><i class="sw" style="background:#f2c200"></i>D2 → sensor</span>
         <span><i class="sw" style="background:#d62828"></i>D8 → buzzer +</span>
         <span><i class="sw" style="background:#1a1a1a;border:1px solid #666"></i>GND</span>
@@ -149,7 +149,7 @@
         <!-- Buzzer -->
         <circle class="box" cx="545" cy="145" r="45"/>
         <circle cx="545" cy="145" r="8" fill="var(--ink)"/>
-        <text class="lbl" x="545" y="212" text-anchor="middle">12 mm passive buzzer</text>
+        <text class="lbl" x="545" y="212" text-anchor="middle">5 V active buzzer</text>
         <text class="sm" x="545" y="227" text-anchor="middle">in the lid ring</text>
         <text class="lbl" x="512" y="122">+</text><text class="lbl" x="512" y="178">−</text>
         <path class="w" stroke="#d62828" d="M410 94 H460 Q470 94 470 104 V108 Q470 118 480 118 H505"/>
@@ -177,19 +177,19 @@
     <h2>Parts list</h2>
     <table>
       <tr><th>Qty</th><th>Part</th><th>Notes</th><th>≈ Price</th></tr>
-      <tr><td>1</td><td><a href="https://www.amazon.com/s?k=arduino+nano+usb-c+without+headers" target="_blank" rel="noopener">Arduino Nano (or clone)</a></td><td>USB-C or Mini-B. Get one without headers soldered on, or desolder them.</td><td>$5–8</td></tr>
-      <tr><td>1</td><td><a href="https://www.amazon.com/s?k=MC-38+wired+magnetic+door+sensor+reed+switch" target="_blank" rel="noopener">Wired magnetic door sensor (MC-38 style)</a></td><td>Only the sensor half is used. Sensor body about 27 × 14 × 8 mm.</td><td>$2</td></tr>
-      <tr><td>1</td><td><a href="https://www.amazon.com/s?k=6x3mm+neodymium+disc+magnet+N52" target="_blank" rel="noopener">6 × 3 mm neodymium disc magnet (N52)</a></td><td>Goes in the lever cap. Usually sold in packs.</td><td>$5/pack</td></tr>
-      <tr><td>1</td><td><a href="https://www.amazon.com/s?k=12mm+passive+buzzer+5V" target="_blank" rel="noopener">12 mm passive buzzer, 5 V</a></td><td><i>Passive</i>, because the code plays tones with <code>tone()</code></td><td>$1</td></tr>
-      <tr><td>1–2 m</td><td><a href="https://www.amazon.com/s?k=22+awg+2+conductor+wire" target="_blank" rel="noopener">Two-core wire, 22–26 AWG</a></td><td>Runs from the sensor to the box</td><td>$3</td></tr>
-      <tr><td>1</td><td>USB cable and 5 V USB wall adapter</td><td>An old phone charger works</td><td>—</td></tr>
+      <tr><td>1</td><td><a href="https://www.amazon.com/dp/B0DFGX3MSL" target="_blank" rel="noopener">AYWHP Nano clone, USB-C, 3-pack</a></td><td>Headers come loose, and a USB-C cable is included</td><td>$13.99</td></tr>
+      <tr><td>1</td><td><a href="https://www.amazon.com/dp/B07F5XL9N8" target="_blank" rel="noopener">uxcell MC-38 door sensor, NC, 2-pack</a></td><td>Only the sensor half is used. 27 × 14 × 7.5 mm, 26 cm leads</td><td>$9.99</td></tr>
+      <tr><td>1</td><td><a href="https://www.amazon.com/dp/B0FMP58G7B" target="_blank" rel="noopener">6 × 3 mm round magnets, 80-pack</a></td><td>Goes in the lever cap</td><td>$7.49</td></tr>
+      <tr><td>1</td><td><a href="https://www.amazon.com/dp/B01N7NHSY6" target="_blank" rel="noopener">Cylewet 5 V active buzzer, 10-pack</a></td><td><i>Active</i> type, under 25 mA, so it's safe on a Nano pin</td><td>$6.99</td></tr>
+      <tr><td>1–2 m</td><td><a href="https://www.amazon.com/dp/B0B9JCJMNP" target="_blank" rel="noopener">Haerkn 22 AWG two-core wire, 10 ft</a></td><td>Extends the sensor leads to the box</td><td>$4.66</td></tr>
+      <tr><td>1</td><td>5 V USB wall adapter</td><td>Any phone charger. The USB-C cable comes with the Nano.</td><td>—</td></tr>
       <tr><td>2+</td><td><a href="https://www.amazon.com/s?k=small+zip+ties+4+inch" target="_blank" rel="noopener">Small zip ties, ≤ 4.8 mm wide</a></td><td>Hold the cradle to the supply line</td><td>$3</td></tr>
       <tr><td>—</td><td>Superglue or epoxy</td><td>Holds the magnet in the cap, and the cap on the lever</td><td>$4</td></tr>
       <tr><td>—</td><td><a href="https://www.amazon.com/s?k=heat+shrink+tubing+kit" target="_blank" rel="noopener">Heat-shrink tubing</a></td><td>Covers the soldered wire joints</td><td>$3</td></tr>
       <tr><td>1</td><td>Command strip or double-sided foam tape</td><td>Mounts the box</td><td>$3</td></tr>
       <tr><td>—</td><td>PETG or PLA filament</td><td>About 30 g for all the parts</td><td>—</td></tr>
     </table>
-    <p class="sub" style="margin:10px 0 0">Tools: 3D printer, soldering iron, flush cutters. Total parts cost is about $25–35. The links go to Amazon searches rather than specific listings. Check that the sensor body is about 27 × 14 × 8 mm and that the buzzer says <b>passive</b>.</p>
+    <p class="sub" style="margin:10px 0 0">Tools: 3D printer, soldering iron, flush cutters. The five linked parts come to $43.12. The design was checked against these exact listings.</p>
   </section>
 
   <section class="card">

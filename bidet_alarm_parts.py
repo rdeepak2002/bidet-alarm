@@ -27,15 +27,17 @@ SEG = 64
 # ------------------------------------------------------------------ PARAMETERS
 # Lever cap -- the lever looked ~6 mm thick in the video; several bores are printed.
 LEVER_BORES = [5.6, 6.0, 6.4, 6.8]   # bore diameters to generate
-CAP_BORE_DEPTH = 12.0                # how far the cap slides onto the lever
+CAP_BORE_DEPTH = 9.0                 # how far the cap slides onto the lever (keep it below the knob disc)
 MAGNET_D, MAGNET_H = 6.0, 3.0        # neodymium disc magnet
 MAGNET_FIT = 0.25                    # extra diameter for the magnet pocket
 
 # Reed sensor (MC-38 style wired door contact, sensor half only)
-SENSOR_W, SENSOR_D, SENSOR_L = 14.0, 8.0, 27.0
+SENSOR_W, SENSOR_D, SENSOR_L = 14.0, 7.5, 27.0   # uxcell MC-38: 27 x 14 x 7.5 mm
 SENSOR_FIT = 0.6
-STANDOFF = 14.0     # pipe centre -> sensor centre distance (how far the lever sits in front of the hose)
+STANDOFF = 16.0     # pipe centre -> sensor centre distance (how far the lever sits in front of the hose)
 PIPE_D = 10.0       # braided supply line diameter (V-groove fits ~8-16 mm)
+NUT_D = 22.0        # coupling nut under the valve (across corners); the cradle top can slide up around it
+NUT_RELIEF = 10.0   # how far the cradle top can overlap the nut
 
 # Enclosure (Arduino Nano + 12 mm buzzer)
 IN_L, IN_W, IN_H = 60.0, 30.0, 24.0  # inside dimensions
@@ -72,7 +74,7 @@ def save(m, name):
 # ------------------------------------------------------------------ PART: lever cap
 def lever_cap(bore):
     """Printed with the magnet end on the bed. z=0 is the magnet face."""
-    od = max(bore + 3.2, MAGNET_D + MAGNET_FIT + 2.4)
+    od = max(bore + 2.4, MAGNET_D + MAGNET_FIT + 2.0)   # 1.2 mm walls = 3 perimeters
     floor = MAGNET_H + 0.2 + 1.0
     total = floor + CAP_BORE_DEPTH
     body = cyl(od, total)
@@ -80,6 +82,8 @@ def lever_cap(bore):
     body -= cyl(bore, CAP_BORE_DEPTH + 0.1).translate([0, 0, floor])
     # entry chamfer
     body -= Manifold.cylinder(1.0, bore / 2, bore / 2 + 0.8, SEG).translate([0, 0, total - 0.99])
+    # flat on one side so the cap can't rub the valve body behind the lever (turn the flat toward the valve)
+    body -= box(-od, -od, -1, od, -(bore / 2 + 0.6), total + 1)
     return body, total
 
 
@@ -87,7 +91,7 @@ def lever_cap(bore):
 def sensor_cradle():
     """Local frame: front face at y=0 (faces away from pipe), pipe behind (+y), z up, bottom at z=0."""
     pw, pd, pl = SENSOR_W + SENSOR_FIT, SENSOR_D - 0.5, SENSOR_L + SENSOR_FIT  # sensor stands 0.5 mm proud
-    side, bottom, top = 2.4, 2.0, 1.2
+    side, bottom, top = 2.4, 2.0, 0.0   # top left open so the sensor sits as close to the magnet as possible
     W = pw + 2 * side
     H = bottom + pl + top
     sensor_cy = (SENSOR_D) / 2 - 0.5          # sensor centre in y
@@ -99,11 +103,14 @@ def sensor_cradle():
     body = box(-W / 2, 0, 0, W / 2, back_y, H)
     # sensor pocket (open at front)
     body -= box(-pw / 2, -1, bottom, pw / 2, pd, bottom + pl)
-    # wire exit slot through the floor
+    # wire exit slot through the floor, plus notches low in both side walls (MC-38 leads exit from the side)
     body -= box(-2.2, -1, -1, 2.2, pd, bottom + 0.1)
+    body -= box(-W / 2 - 1, -1, bottom, W / 2 + 1, pd - 1.5, bottom + 5)
     # 90 degree V-groove on the back, full height
     g = Manifold.cube([20, 20, H + 2], True).rotate([0, 0, 45]).translate([0, back_y + 20 / math.sqrt(2) - groove_depth, H / 2])
     body -= g
+    # relief at the top-back so the cradle can slide up in front of the coupling nut
+    body -= cyl(NUT_D + 1.0, NUT_RELIEF + 1).translate([0, pipe_y, H - NUT_RELIEF])
     # zip-tie channels (5 mm wide, 1.2 deep) around front + sides
     for zc in (bottom + 6, bottom + pl - 6):
         band = box(-W / 2 - 1, -1, zc - 2.6, W / 2 + 1, back_y - groove_depth, zc + 2.6)
@@ -177,7 +184,7 @@ cap_asm = cap.rotate([180, 0, 0]).translate([0, LEVER_Y, -LEVER_LEN + CAP_BORE_D
 magnet_z = -LEVER_LEN + CAP_BORE_DEPTH - cap_len
 magnet = cyl(MAGNET_D, MAGNET_H, 24).translate([0, LEVER_Y, magnet_z + 0.1])
 # cradle: front faces -y (toward viewer); its sensor centre must line up under the lever (y = LEVER_Y)
-gap = 5.0
+gap = 3.0
 c_top = magnet_z - gap
 cradle_asm = cradle.translate([0, -cinfo["pipe_y"], c_top - cinfo["H"]])  # pipe at y=0, sensor under the lever
 sensor = box(-SENSOR_W / 2, -SENSOR_D / 2, 0, SENSOR_W / 2, SENSOR_D / 2, SENSOR_L).translate(
