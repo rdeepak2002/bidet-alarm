@@ -2,6 +2,12 @@
 # Run on the Mac after the freshly flashed Pi has booted (first boot takes ~2-3 min).
 #   ./pi/setup_from_mac.sh
 # Waits for bidet-alarm.local, checks SSH + Wi-Fi, copies this repo to the Pi and installs what the alarm needs.
+# Needs this block in ~/.ssh/config:
+#   Host bidet-alarm
+#       HostName bidet-alarm.local
+#       User pi
+#       IdentityFile ~/.ssh/id_ed25519
+#       StrictHostKeyChecking accept-new
 set -euo pipefail
 HOST=bidet-alarm            # ~/.ssh/config entry -> bidet-alarm.local, user pi, ~/.ssh/id_ed25519
 REPO="$(cd "$(dirname "$0")/.." && pwd)"

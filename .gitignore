@@ -1,5 +1,8 @@
-.DS_Store
+# OS images are downloaded by Raspberry Pi Imager; never commit them
+*.img
+*.img.xz
+*.zip
+# real first-boot network config contains the hashed Wi-Fi key
+network-config
 __pycache__/
-*.pyc
-venv/
-.venv/
+.DS_Store

@@ -1,0 +1,13 @@
+# Filled in by prepare_sd_card.sh. The real file (with the hashed Wi-Fi key) is written
+# straight to the SD card and is never saved in this repo.
+network:
+  version: 2
+  wifis:
+    renderer: NetworkManager
+    wlan0:
+      dhcp4: true
+      optional: true
+      regulatory-domain: "US"
+      access-points:
+        "WIFI_SSID":
+          password: "WIFI_PSK_HEX"
