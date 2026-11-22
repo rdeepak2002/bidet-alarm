@@ -26,7 +26,7 @@ SENSOR_GAP = 3.0                      # target gap between magnet face and Hall 
 PCB_PROUD = 3.0                       # board sticks out this far above the holder
 FIT = 0.3                             # slot clearance
 PIPE_D = g["PIPE_D"]
-LEVER_Y = g["LEVER_Y"]                # lever centre (in front of the supply line), -STANDOFF
+LEVER_Y = g["MAGNET_Y"]               # magnet centre (lever axis, shifted away from the valve for wide magnets)
 # ---------------------------------------------------------------------------
 
 # Assembly frame: supply line axis = z axis, lever/magnet at y = LEVER_Y, z up.

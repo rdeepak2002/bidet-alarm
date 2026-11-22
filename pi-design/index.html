@@ -49,7 +49,7 @@
 <body>
 <main>
   <h1>Bidet alarm, Pi edition <span class="pill">$0: parts you already have</span></h1>
-  <p class="sub">This version uses a Raspberry Pi 4B, a KY-024 Hall sensor, two stacked 6×2 mm magnets, your 24 AWG wire and your USB speaker. For the Nano version, see <a href="../assembly.html">the original design</a>.</p>
+  <p class="sub">This version uses a Raspberry Pi 4B, a KY-024 Hall sensor, a stack of ten 12 mm magnets, your 24 AWG wire and your USB speaker. For the Nano version, see <a href="../assembly.html">the original design</a>.</p>
 
   <div class="grid">
     <section class="card">
@@ -65,7 +65,7 @@
         <span><i class="sw" style="background:#f08a24"></i>Lever cap (printed)</span>
         <span><i class="sw" style="background:#f5b041"></i>KY-024 holder (printed)</span>
         <span><i class="sw" style="background:#e9e4d8;border:1px solid #bbb"></i>Cover (printed)</span>
-        <span><i class="sw" style="background:#3b6fd8"></i>2× 6×2 mm magnets</span>
+        <span><i class="sw" style="background:#3b6fd8"></i>10× 12 mm magnet stack</span>
         <span><i class="sw" style="background:#1f6fb2"></i>KY-024 board</span>
         <span><i class="sw" style="background:#d62828"></i>3.3 V</span>
         <span><i class="sw" style="background:#1a1a1a;border:1px solid #666"></i>GND</span>
@@ -75,7 +75,7 @@
     <section class="card">
       <h2>How it works</h2>
       <ol>
-        <li>The lever cap holds <b>two stacked 6×2 mm magnets</b> at the lever tip.</li>
+        <li>The lever cap holds a <b>stack of ten 12 mm magnets</b> (15.7 mm tall) at the lever tip, offset 3.7 mm away from the valve so the wide stack can't rub it.</li>
         <li>The printed holder zip-ties to the supply line. It holds the KY-024 with its Hall sensor bent to face straight up, <b>3 mm under the magnet</b>.</li>
         <li><b>Closed:</b> about 120 mT reaches the sensor, which needs only a few mT (the threshold screw sets the exact level). D0 reads "magnet near".</li>
         <li><b>Open:</b> the lever swings 90° and the field drops to about 0.2 mT. A 10-minute timer starts.</li>
@@ -147,7 +147,7 @@
         <tr><th>Part</th><th>Use</th></tr>
         <tr><td>Raspberry Pi 4B + USB-C power supply + microSD (Raspberry Pi OS)</td><td>Runs the alarm</td></tr>
         <tr><td>KY-024 linear Hall sensor module</td><td>Detects the magnet. The KY-003 isn't used: its chip needs 4.5 V or more, and the Pi's pins are 3.3 V.</td></tr>
-        <tr><td>Caturledas magnet pack</td><td>Two 6×2 mm discs, stacked</td></tr>
+        <tr><td>Caturledas magnet pack</td><td>Ten 12 mm discs, stacked (15.7 mm)</td></tr>
         <tr><td>24 AWG wire</td><td>3 strands, valve to Pi</td></tr>
         <tr><td>USB speaker</td><td>Alarm sound</td></tr>
         <tr><td>Zip ties, heat-shrink</td><td>Mounting and covering solder joints</td></tr>
@@ -180,7 +180,7 @@
       <li><input type="checkbox"><span><b>Unplug the Pi.</b> Find <b>pin 1</b>: it's at the end of the 40-pin header <b>farthest from the USB/Ethernet ports</b>, on the row <b>toward the middle of the board</b>. The pin right next to it, on the outer row, is <b>pin 2, which is 5 V. Don't use it.</b> Pin 6 (GND) is on the outer row, 3rd from that end.</span></li>
       <li><input type="checkbox"><span>Connect <b>KY-024 "+" to pin 1</b> and <b>"G" to pin 6</b> with female-to-female jumpers. Leave D0 and A0 unconnected for now.</span></li>
       <li><input type="checkbox"><span>Plug in the Pi's USB-C power, with no SD card. One LED on the KY-024 (power) should light. If neither lights, unplug and re-check the two wires.</span></li>
-      <li><input type="checkbox"><span>Stack two 6×2 mm magnets and hold one flat face toward the <b>front of the black Hall sensor</b> (the side with the printing). If the second LED doesn't react, try the other face.</span></li>
+      <li><input type="checkbox"><span>Stack ten 12 mm magnets and hold one flat face toward the <b>front of the black Hall sensor</b> (the side with the printing). If the second LED doesn't react, try the other face.</span></li>
       <li><input type="checkbox"><span>Turn the blue <b>threshold screw</b>. It's multi-turn, so it may take several full turns. Stop when the second LED turns <b>on with the magnet about 5 mm away</b> and <b>off when you pull it away</b>, about 3 cm or more.</span></li>
       <li><input type="checkbox"><span>Mark the magnet face that works with a marker. That face must point at the sensor when the magnets go in the lever cap.</span></li>
       <li><input type="checkbox"><span>While it's out, measure the KY-024 board's <b>length</b> (header end to sensor end) and <b>width</b>, and send them to Claude.</span></li>
@@ -191,7 +191,7 @@
       <li><input type="checkbox"><span>Wire the KY-024 to the Pi: <b>+ to pin 1</b>, <b>G to pin 6</b>, <b>D0 to pin 11</b>.</span></li>
       <li><input type="checkbox"><span>Copy the repo to the Pi, e.g. <code>git clone</code> it, or <code>scp -r</code> the folder to <code>/home/pi/bidet-alarm</code>.</span></li>
       <li><input type="checkbox"><span>Run <code>python3 pi/bidet_alarm.py --calibrate</code>.</span></li>
-      <li><input type="checkbox"><span>Stack two 6×2 magnets and bring them to the Hall sensor's face. Turn the blue threshold screw until the board's LED switches on at about <b>5 mm</b> and off when you pull the magnet away. If nothing happens, flip the magnets over.</span></li>
+      <li><input type="checkbox"><span>Bring the 12 mm magnet stack to the Hall sensor's face. Turn the blue threshold screw until the board's LED switches on at about <b>10–15 mm</b> and off when you pull the magnet away. If nothing happens, flip the magnets over.</span></li>
       <li><input type="checkbox"><span>Note the <b>D0 value printed with the magnet near</b>. If it's 1, set <code>MAGNET_NEAR_VALUE=1</code>.</span></li>
       <li><input type="checkbox"><span>Plug in the USB speaker. Run <code>python3 pi/bidet_alarm.py --test</code>, then move the magnet away and wait 10 s for the beeps. If you hear nothing, see Audio below.</span></li>
     </ul>
@@ -240,7 +240,7 @@
       <h2>Print files <code>pi-design/print/</code></h2>
       <table>
         <tr><th>File</th><th>Notes</th></tr>
-        <tr><td><code>lever_cap_5.6mm … 6.8mm.stl</code></td><td>Magnet end down. PETG, 100% infill. The pocket fits two 6×2 magnets.</td></tr>
+        <tr><td><code>lever_cap_5.6mm … 6.8mm.stl</code></td><td>Magnet end down. PETG, 100% infill. The pocket fits the 12 mm × 15.7 mm stack; push it in with the marked face out, plus a drop of glue.</td></tr>
         <tr><td><code>ky024_holder.stl</code></td><td>Upright, no supports. PETG. 20 × 12 × 35 mm.</td></tr>
         <tr><td><code>ky024_cover.stl</code></td><td>Front face down, no supports. PETG. Has a screwdriver hole for the threshold screw.</td></tr>
       </table>

@@ -28,7 +28,7 @@ SEG = 64
 # Lever cap -- the lever looked ~6 mm thick in the video; several bores are printed.
 LEVER_BORES = [5.6, 6.0, 6.4, 6.8]   # bore diameters to generate
 CAP_BORE_DEPTH = 9.0                 # how far the cap slides onto the lever (keep it below the knob disc)
-MAGNET_D, MAGNET_H = 6.0, 3.2        # two stacked 6 mm discs; measured 3.2 mm for the pair (listing says 2 mm each)
+MAGNET_D, MAGNET_H = 12.0, 15.7      # ten stacked 12 mm discs (Caturledas pack), measured 15.7 mm tall
 MAGNET_FIT = 0.25                    # extra diameter for the magnet pocket
 
 # Reed sensor (MC-38 style wired door contact, sensor half only)
@@ -72,13 +72,23 @@ def save(m, name):
 
 
 # ------------------------------------------------------------------ PART: lever cap
+def magnet_offset(bore=6.0):
+    """How far the magnet centre sits off the lever axis, away from the valve, so the valve-side
+    flat stays at bore/2 + 0.6 (a magnet wider than the lever would otherwise rub the valve)."""
+    return max(0.0, (MAGNET_D + MAGNET_FIT) / 2 + 1.2 - (bore / 2 + 0.6))
+
+
 def lever_cap(bore):
     """Printed with the magnet end on the bed. z=0 is the magnet face."""
-    od = max(bore + 2.4, MAGNET_D + MAGNET_FIT + 2.0)   # 1.2 mm walls = 3 perimeters
+    od = bore + 2.4                                     # sleeve around the lever, 1.2 mm walls
+    mod = MAGNET_D + MAGNET_FIT + 2.4                   # magnet housing
+    e = magnet_offset(bore)                             # magnet centre shifted AWAY from the valve (+y here)
     floor = MAGNET_H + 0.2 + 1.0
     total = floor + CAP_BORE_DEPTH
-    body = cyl(od, total)
-    body -= cyl(MAGNET_D + MAGNET_FIT, MAGNET_H + 0.2).translate([0, 0, -0.01])
+    body = cyl(od, total) + cyl(mod, floor).translate([0, e, 0])
+    body = Manifold.batch_hull([cyl(od, 0.01).translate([0, 0, floor - 0.01]), cyl(mod, floor).translate([0, e, 0]),
+                                cyl(od, floor + 2).translate([0, 0, 0])]) + cyl(od, total)   # smooth neck
+    body -= cyl(MAGNET_D + MAGNET_FIT, MAGNET_H + 0.2).translate([0, e, -0.01])
     body -= cyl(bore, CAP_BORE_DEPTH + 0.1).translate([0, 0, floor])
     # entry chamfer
     body -= Manifold.cylinder(1.0, bore / 2, bore / 2 + 0.8, SEG).translate([0, 0, total - 0.99])
@@ -182,7 +192,8 @@ lever = cyl(6, LEVER_LEN, 24).translate([0, 0, -LEVER_LEN]).translate([0, LEVER_
 # cap in assembly frame: open end up, magnet face down, slid onto lever tip
 cap_asm = cap.rotate([180, 0, 0]).translate([0, LEVER_Y, -LEVER_LEN + CAP_BORE_DEPTH])
 magnet_z = -LEVER_LEN + CAP_BORE_DEPTH - cap_len
-magnet = cyl(MAGNET_D, MAGNET_H, 24).translate([0, LEVER_Y, magnet_z + 0.1])
+MAGNET_Y = LEVER_Y - magnet_offset(6.0)   # cap is flipped in the assembly: offset points away from the valve (-y)
+magnet = cyl(MAGNET_D, MAGNET_H, 24).translate([0, MAGNET_Y, magnet_z + 0.1])
 # cradle: front faces -y (toward viewer); its sensor centre must line up under the lever (y = LEVER_Y)
 gap = 3.0
 c_top = magnet_z - gap
