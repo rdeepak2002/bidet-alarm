@@ -49,7 +49,7 @@
 <body>
 <main>
   <h1>Bidet alarm, Pi edition <span class="pill">$0: parts you already have</span></h1>
-  <p class="sub">This version uses a Raspberry Pi 4B, a KY-024 Hall sensor, a stack of ten 12 mm magnets, your 24 AWG wire and your USB speaker. For the Nano version, see <a href="../assembly.html">the original design</a>.</p>
+  <p class="sub">This version uses a Raspberry Pi 4B, a KY-024 Hall sensor, a stack of ten 12 mm magnets, your 24 AWG wire and your USB speaker. For the Nano version, see <a href="../archive/nano-design/assembly.html">the original design</a>.</p>
 
   <div class="grid">
     <section class="card">
@@ -237,7 +237,7 @@
       <p>Put the same name in <code>bidet-alarm.service</code>. Run <code>alsamixer</code> and press F6 to turn the volume up.</p>
     </section>
     <section class="card">
-      <h2>Print files <code>pi-design/print/</code></h2>
+      <h2>Print files <code>print/</code></h2>
       <table>
         <tr><th>File</th><th>Notes</th></tr>
         <tr><td><code>lever_cap_7.7 / 7.9 / 8.1mm.stl</code></td><td>Magnet end down. PETG, 100% infill. The pocket fits the 12 mm × 15.7 mm stack; push it in with the marked face out, plus a drop of glue.</td></tr>
@@ -246,7 +246,7 @@
       </table>
       <div class="note">The KY-024 holder uses <b>typical</b> board sizes (38 × 15 mm). Measure your board first. Change <code>KY_L</code>, <code>KY_W</code> and <code>SENSOR_ABOVE_PCB</code> in <code>pi_parts.py</code> to match, then run it again.</div>
       <h3>Pi vs Nano</h3>
-      <p style="margin:0">The Pi version costs nothing, is louder, and can send phone alerts. It takes about 30 s to boot and uses about 3 W. If you later want a smaller, always-instant version, the <a href="../assembly.html">Nano design</a> uses the same lever cap.</p>
+      <p style="margin:0">The Pi version costs nothing, is louder, and can send phone alerts. It takes about 30 s to boot and uses about 3 W. If you later want a smaller, always-instant version, the <a href="../archive/nano-design/assembly.html">Nano design</a> uses the same lever cap.</p>
     </section>
   </div>
 </main>

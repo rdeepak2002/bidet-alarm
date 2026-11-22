@@ -1,7 +1,7 @@
 """
 Pi / KY-024 alternate design - parametric printable parts + viewer data.
 
-Reuses the lever cap and reference valve from ../bidet_alarm_parts.py and adds a holder
+Reuses the lever cap and reference valve from ../archive/nano-design/bidet_alarm_parts.py and adds a holder
 for the KY-024 Hall sensor board. Run:  python pi_parts.py   (needs manifold3d trimesh numpy)
 
 KY-024 sizes below are typical values - MEASURE YOUR BOARD and edit them before printing.
@@ -14,9 +14,9 @@ import runpy
 import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(HERE, "print")
+OUT = os.path.join(HERE, "..", "print")
 os.makedirs(OUT, exist_ok=True)
-g = runpy.run_path(os.path.join(HERE, "..", "bidet_alarm_parts.py"))
+g = runpy.run_path(os.path.join(HERE, "..", "archive", "nano-design", "bidet_alarm_parts.py"))  # shared valve + lever cap geometry
 Manifold, box, cyl, to_trimesh = g["Manifold"], g["box"], g["cyl"], g["to_trimesh"]
 
 # ------------------------------------------------------------------ PARAMETERS
