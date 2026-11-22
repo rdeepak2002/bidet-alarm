@@ -33,7 +33,7 @@ from gpiozero import DigitalInputDevice
 SENSOR_GPIO = 17
 # Reading of D0 when the magnet is NEXT to the sensor (valve CLOSED).
 # KY-024 boards differ; run --calibrate and set this to what you see with the magnet near.
-MAGNET_NEAR_VALUE = int(os.environ.get("MAGNET_NEAR_VALUE", "0"))
+MAGNET_NEAR_VALUE = int(os.environ.get("MAGNET_NEAR_VALUE", "1"))   # this KY-024 reads 1 with the magnet near (measured)
 
 ALARM_DELAY = 10 * 60       # seconds the valve may stay open
 REPEAT_EVERY = 30           # seconds between repeated alarms
