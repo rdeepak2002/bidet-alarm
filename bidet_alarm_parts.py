@@ -26,7 +26,8 @@ SEG = 64
 
 # ------------------------------------------------------------------ PARAMETERS
 # Lever cap -- the lever looked ~6 mm thick in the video; several bores are printed.
-LEVER_BORES = [5.6, 6.0, 6.4, 6.8]   # bore diameters to generate
+LEVER_D = 7.7                         # measured lever diameter (where the cap slides on)
+LEVER_BORES = [7.7, 7.9, 8.1]        # bore diameters to generate (printed holes shrink ~0.1-0.2 mm; 7.9 is the likely snug fit)
 CAP_BORE_DEPTH = 9.0                 # how far the cap slides onto the lever (keep it below the knob disc)
 MAGNET_D, MAGNET_H = 12.0, 15.7      # ten stacked 12 mm discs (Caturledas pack), measured 15.7 mm tall
 MAGNET_FIT = 0.25                    # extra diameter for the magnet pocket
@@ -72,7 +73,7 @@ def save(m, name):
 
 
 # ------------------------------------------------------------------ PART: lever cap
-def magnet_offset(bore=6.0):
+def magnet_offset(bore=7.9):
     """How far the magnet centre sits off the lever axis, away from the valve, so the valve-side
     flat stays at bore/2 + 0.6 (a magnet wider than the lever would otherwise rub the valve)."""
     return max(0.0, (MAGNET_D + MAGNET_FIT) / 2 + 1.2 - (bore / 2 + 0.6))
@@ -173,7 +174,7 @@ parts = {}
 for b in LEVER_BORES:
     cap, cap_len = lever_cap(b)
     save(cap, f"lever_cap_{b:.1f}mm.stl")
-cap, cap_len = lever_cap(6.0)
+cap, cap_len = lever_cap(7.9)
 cradle, cinfo = sensor_cradle()
 base, lid, einfo = enclosure()
 save(cradle, "sensor_cradle.stl")
@@ -188,11 +189,13 @@ valve += cyl(22, 10, 6).translate([0, 0, -35])                                # 
 valve += cyl(24, 12, 6).translate([0, 0, 30])                                 # tank adapter
 pipe = cyl(PIPE_D, 70, 24).translate([0, 0, -105])
 hose = cyl(9, 30, 24).rotate([0, 90, 0]).translate([22, 0, 5])
-lever = cyl(6, LEVER_LEN, 24).translate([0, 0, -LEVER_LEN]).translate([0, LEVER_Y, 0])
+lever = cyl(LEVER_D, LEVER_LEN, 24).translate([0, 0, -LEVER_LEN]).translate([0, LEVER_Y, 0])
 # cap in assembly frame: open end up, magnet face down, slid onto lever tip
-cap_asm = cap.rotate([180, 0, 0]).translate([0, LEVER_Y, -LEVER_LEN + CAP_BORE_DEPTH])
+# cap as installed: magnet end DOWN (its print orientation), bore up over the lever tip; turned 180 deg about z
+# so the flat (cap -y) faces the valve (+y) and the offset magnet sits away from it
 magnet_z = -LEVER_LEN + CAP_BORE_DEPTH - cap_len
-MAGNET_Y = LEVER_Y - magnet_offset(6.0)   # cap is flipped in the assembly: offset points away from the valve (-y)
+cap_asm = cap.rotate([0, 0, 180]).translate([0, LEVER_Y, magnet_z])
+MAGNET_Y = LEVER_Y - magnet_offset(7.9)   # cap is flipped in the assembly: offset points away from the valve (-y)
 magnet = cyl(MAGNET_D, MAGNET_H, 24).translate([0, MAGNET_Y, magnet_z + 0.1])
 # cradle: front faces -y (toward viewer); its sensor centre must line up under the lever (y = LEVER_Y)
 gap = 3.0

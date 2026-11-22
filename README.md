@@ -70,7 +70,7 @@ You don't need any resistors, because the sketch turns on the Nano's internal pu
 
 | File | Orientation | Notes |
 |---|---|---|
-| `lever_cap_5.6mm.stl` … `lever_cap_6.8mm.stl` | Magnet end down | Print all four and keep the one that fits the lever snugly. PETG, 100% infill. |
+| `lever_cap_7.7mm.stl`, `7.9mm`, `8.1mm` | Magnet end down | Lever measured at 7.7 mm. Print all three (7.9 is the likely snug fit) and keep the one that fits. PETG, 100% infill. |
 | `sensor_cradle.stl` | Upright | PETG, no supports |
 | `enclosure_base.stl` | Open side up | No supports |
 | `enclosure_lid.stl` | Flat face down | No supports |
