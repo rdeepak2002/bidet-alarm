@@ -20,7 +20,7 @@ g = runpy.run_path(os.path.join(HERE, "..", "bidet_alarm_parts.py"))
 Manifold, box, cyl, to_trimesh = g["Manifold"], g["box"], g["cyl"], g["to_trimesh"]
 
 # ------------------------------------------------------------------ PARAMETERS
-KY_L, KY_W, PCB_T = 34.7, 16.0, 1.6   # KY-024 board: measured 34.7 x 16 mm (header end to far edge), thickness
+KY_L, KY_W, PCB_T = 34.7, 15.3, 1.6   # KY-024 board: measured 34.7 x 15.3 mm (header end to far edge), thickness
 SENSOR_ABOVE_PCB = 4.0                # how far the bent Hall sensor's face sits above the board's top edge
 SENSOR_GAP = 3.0                      # target gap between magnet face and Hall sensor face (valve closed)
 PCB_PROUD = 3.0                       # board sticks out this far above the holder
