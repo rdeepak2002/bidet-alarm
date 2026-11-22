@@ -90,50 +90,54 @@
   <div class="grid">
     <section class="card">
       <h2>Wiring</h2>
-      <svg viewBox="0 0 640 360" width="100%" role="img" aria-label="KY-024 to Raspberry Pi pins 1, 6 and 11; USB speaker to a USB port">
+      <svg viewBox="0 0 660 370" width="100%" role="img" aria-label="KY-024 to Raspberry Pi 40-pin header pins 1, 6 and 11; USB speaker to a USB port">
         <defs><style>
           .box{fill:var(--card);stroke:var(--ink);stroke-width:1.5}
           .w{fill:none;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
           .lbl{font-size:13px;font-weight:600} .sm{font-size:11px;fill:var(--muted)} .wt{fill:#fff;font-size:11px;font-weight:600}
+          .pn{fill:#fff;font-size:9px;font-weight:700;text-anchor:middle}
         </style></defs>
-        <!-- Pi board -->
-        <rect x="330" y="30" width="280" height="190" rx="10" fill="#1f7a4d" stroke="#155c39" stroke-width="1.5"/>
-        <text class="wt" x="470" y="200" text-anchor="middle" style="font-size:13px">Raspberry Pi 4B</text>
-        <!-- header pins 1..12 (2 rows) -->
-        <g>
-          <rect x="350" y="42" width="160" height="40" rx="4" fill="#123d27"/>
-          <!-- odd pins bottom row (1,3,5,...), even top row -->
-          <g id="pins"></g>
-        </g>
-        <text class="wt" x="347" y="98">pin 1</text>
-        <text class="wt" x="388" y="38" style="display:none">.</text>
-        <!-- USB ports -->
-        <rect x="610" y="120" width="18" height="30" rx="2" fill="#bbb"/><rect x="610" y="160" width="18" height="30" rx="2" fill="#bbb"/>
+        <!-- Pi board (seen from above, header along the top edge) -->
+        <rect x="300" y="24" width="320" height="196" rx="10" fill="#1f7a4d" stroke="#155c39" stroke-width="1.5"/>
+        <text class="wt" x="440" y="206" text-anchor="middle" style="font-size:13px">Raspberry Pi 4B (top view)</text>
+        <!-- 40-pin header: 20 columns x 2 rows. Odd pins (1,3,..39) inner row, even pins (2,4,..40) outer edge row -->
+        <rect x="308" y="40" width="286" height="44" rx="4" fill="#123d27"/>
+        <g id="pins"></g>
+        <text class="pn" x="306" y="78">1</text><text class="pn" x="402" y="97">11</text><text class="pn" x="584" y="96">39</text>
+        <text class="pn" x="318" y="36">2</text><text class="pn" x="356" y="36">6</text><text class="pn" x="584" y="36">40</text>
+        <text class="wt" x="412" y="120">40-pin header, 20 × 2</text>
+        <text class="wt" x="412" y="137" style="fill:#ffb3b3;font-size:10px">red = 5 V (pins 2, 4): don't use</text>
+        <text class="wt" x="412" y="153" style="fill:#cfe9da;font-weight:400;font-size:10px">pin 1: corner farthest from USB</text>
+        <!-- Ethernet + USB ports on the far end -->
+        <rect x="604" y="50" width="30" height="40" rx="3" fill="#ccc"/><text class="sm" x="619" y="74" text-anchor="middle" style="font-size:8px">ETH</text>
+        <rect x="608" y="104" width="26" height="34" rx="2" fill="#bbb"/><rect x="608" y="150" width="26" height="34" rx="2" fill="#bbb"/>
+        <text class="sm" x="621" y="200" text-anchor="middle" style="font-size:8px">USB</text>
         <!-- KY-024 -->
         <rect class="box" x="30" y="40" width="190" height="90" rx="8"/>
         <text class="lbl" x="125" y="66" text-anchor="middle">KY-024 (at the valve)</text>
         <text class="sm" x="125" y="84" text-anchor="middle">pins: A0 · G · + · D0</text>
-        <circle cx="70" cy="112" r="5" fill="#999"/><text class="sm" x="70" y="126" text-anchor="middle" style="display:none">A0</text>
+        <circle cx="70" cy="112" r="5" fill="#999"/>
         <circle cx="110" cy="112" r="5" fill="#d4af37"/><circle cx="150" cy="112" r="5" fill="#d4af37"/><circle cx="190" cy="112" r="5" fill="#d4af37"/>
         <text class="sm" x="70" y="104" text-anchor="middle">A0</text><text class="sm" x="110" y="104" text-anchor="middle">G</text>
         <text class="sm" x="150" y="104" text-anchor="middle">+</text><text class="sm" x="190" y="104" text-anchor="middle">D0</text>
-        <!-- wires: + -> pin1 (x=357,y=74), G -> pin6 (x=405,y=50), D0 -> pin11 (x=437,y=74) -->
-        <path class="w" stroke="#d62828" d="M150 117 V160 H300 Q357 160 357 120 V78"/>
-        <path class="w" stroke="#333" d="M110 117 V175 H300 Q320 175 320 140 V10 H389 V46"/>
-        <path class="w" stroke="#f2c200" d="M190 117 V145 H290 Q437 145 437 110 V78"/>
-        <text class="sm" x="210" y="198">red: + → pin 1 (3.3 V)</text>
-        <text class="sm" x="210" y="214">black: G → pin 6 (GND)</text>
-        <text class="sm" x="210" y="230">yellow: D0 → pin 11 (GPIO17)</text>
+        <!-- wires: + -> pin1 (318,74), G -> pin6 (346,50), D0 -> pin11 (388,74) -->
+        <path class="w" stroke="#d62828" d="M150 117 V145 H288 Q318 145 318 115 V78"/>
+        <path class="w" stroke="#333" d="M110 117 V190 H18 V12 H346 V46"/>
+        <path class="w" stroke="#f2c200" d="M190 117 V165 H358 Q388 165 388 135 V78"/>
+        <text class="sm" x="40" y="214">red: + → pin 1 (3.3 V)</text>
+        <text class="sm" x="40" y="230">black: G → pin 6 (GND)</text>
+        <text class="sm" x="40" y="246">yellow: D0 → pin 11 (GPIO17)</text>
+        <text class="sm" x="40" y="262">A0: not connected</text>
         <!-- speaker -->
-        <rect class="box" x="440" y="262" width="170" height="64" rx="10"/>
-        <circle cx="468" cy="294" r="15" fill="none" stroke="var(--ink)" stroke-width="2"/><circle cx="468" cy="294" r="5" fill="var(--ink)"/>
-        <text class="lbl" x="542" y="290" text-anchor="middle">USB speaker</text>
-        <text class="sm" x="542" y="308" text-anchor="middle">USB (+ 3.5 mm jack)</text>
-        <path class="w" stroke="#9aa0a8" d="M605 292 Q632 292 632 250 V178 H628"/>
+        <rect class="box" x="440" y="270" width="170" height="64" rx="10"/>
+        <circle cx="468" cy="302" r="15" fill="none" stroke="var(--ink)" stroke-width="2"/><circle cx="468" cy="302" r="5" fill="var(--ink)"/>
+        <text class="lbl" x="542" y="298" text-anchor="middle">USB speaker</text>
+        <text class="sm" x="542" y="316" text-anchor="middle">USB (+ 3.5 mm jack)</text>
+        <path class="w" stroke="#9aa0a8" d="M610 302 Q648 302 648 260 V167 H634"/>
         <!-- power -->
-        <rect class="box" x="330" y="262" width="105" height="40" rx="8"/>
-        <text class="lbl" x="382" y="287" text-anchor="middle">5 V 3 A USB-C</text>
-        <path class="w" stroke="#9aa0a8" d="M382 262 V220"/>
+        <rect class="box" x="300" y="270" width="110" height="40" rx="8"/>
+        <text class="lbl" x="355" y="295" text-anchor="middle">5 V 3 A USB-C</text>
+        <path class="w" stroke="#9aa0a8" d="M355 270 V220"/>
       </svg>
       <div class="note"><b>Use 3.3 V (pin 1), never 5 V,</b> for the sensor. Its D0 output follows its supply voltage, and the Pi's pins are damaged by 5 V.</div>
     </section>
@@ -254,11 +258,12 @@
 // ---------- header pins in the SVG
 (function () {
   const g = document.getElementById('pins'); const NS = 'http://www.w3.org/2000/svg';
-  for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < 40; i++) {
     const n = i + 1, col = Math.floor(i / 2), odd = n % 2 === 1;
+    const used = [1, 6, 11].includes(n), danger = n === 2 || n === 4;
     const c = document.createElementNS(NS, 'circle');
-    c.setAttribute('cx', 357 + col * 16); c.setAttribute('cy', odd ? 74 : 50); c.setAttribute('r', 5);
-    c.setAttribute('fill', [1, 6, 11].includes(n) ? '#ffd34d' : '#c9a227'); c.setAttribute('opacity', [1, 6, 11].includes(n) ? 1 : 0.55);
+    c.setAttribute('cx', 318 + col * 14); c.setAttribute('cy', odd ? 74 : 50); c.setAttribute('r', used ? 5.5 : 4.5);
+    c.setAttribute('fill', used ? '#ffd34d' : danger ? '#ff4d4d' : '#c9a227'); c.setAttribute('opacity', used || danger ? 1 : 0.5);
     g.appendChild(c);
   }
 })();
