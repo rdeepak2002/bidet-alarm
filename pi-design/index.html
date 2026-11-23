@@ -220,7 +220,6 @@
       <li><input type="checkbox"><span>Solder 3 strands of 24 AWG wire, red, black and yellow if you have them, from the sensor to the Pi. Cover each joint with heat-shrink.</span></li>
       <li><input type="checkbox"><span>Put the Pi somewhere dry, in a case and off the floor. Run the cable along the wall.</span></li>
       <li><input type="checkbox"><span>Start the alarm at boot: <code>sudo cp pi/bidet-alarm.service /etc/systemd/system/ && sudo systemctl enable --now bidet-alarm</code>.</span></li>
-      <li><input type="checkbox"><span>Optional: install the <b>ntfy</b> app on Mom's phone and set <code>NTFY_TOPIC</code> in the service file to a long random name. Anyone who knows the name can read the alerts.</span></li>
       <li><input type="checkbox"><span>Optional: record a voice message as <code>pi/alarm.wav</code> and it plays instead of the beeps.</span></li>
       <li><input type="checkbox"><span>Final test: leave the valve open for 10 minutes and confirm it alarms, then close it and confirm it stops.</span></li>
     </ul>

@@ -82,7 +82,7 @@ The alarm program serves the page itself on port 80, so if the page loads, the a
 
 - `pi/bidet_alarm.py`: `--calibrate` prints the sensor reading live, `--test` alarms after 10 s, no flag is the normal 10-minute run. It also serves the status page and finds a USB speaker by itself.
 - `pi/status.html`, `pi/manifest.json`, `pi/*icon*.png`: the status page and its home-screen app name and icon.
-- `pi/bidet-alarm.service`: starts the alarm at boot and lets it serve port 80. `setup_from_mac.sh` installs it; by hand: `sudo cp pi/bidet-alarm.service /etc/systemd/system/ && sudo systemctl enable --now bidet-alarm`. Logs: `journalctl -u bidet-alarm -f`. Optional settings in the file: `NTFY_TOPIC` (phone notification), `AUDIO_DEVICE` (force a speaker), `KEEP_DAYS`/`MAX_EVENTS` (history pruning).
+- `pi/bidet-alarm.service`: starts the alarm at boot and lets it serve port 80. `setup_from_mac.sh` installs it; by hand: `sudo cp pi/bidet-alarm.service /etc/systemd/system/ && sudo systemctl enable --now bidet-alarm`. Logs: `journalctl -u bidet-alarm -f`. Optional settings in the file: `AUDIO_DEVICE` (force a speaker), `KEEP_DAYS`/`MAX_EVENTS` (history pruning).
 - `pi/prepare_sd_card.sh`, `pi/setup_from_mac.sh`, `pi/firstboot/`: the setup steps above.
 
 ## Repo layout

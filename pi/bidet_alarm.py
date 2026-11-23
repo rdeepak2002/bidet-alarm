@@ -16,10 +16,6 @@ Usage:
 
 Status page: while it runs, http://bidet-alarm.local/ shows whether the valve is open, for how
 long, and the recent history (port 80 under the service; WEB_PORT overrides it, 0 turns it off).
-
-Optional phone notification: set NTFY_TOPIC to a long random name, install the free
-"ntfy" app on the phone and subscribe to the same topic. Anyone who knows the topic
-name can read it, so make it unguessable.
 """
 import argparse
 import json
@@ -31,7 +27,6 @@ import subprocess
 import sys
 import threading
 import time
-import urllib.request
 import urllib.parse
 import wave
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -48,7 +43,6 @@ REPEAT_EVERY = 30           # seconds between repeated alarms
 HERE = os.path.dirname(os.path.abspath(__file__))
 CUSTOM_SOUND = os.path.join(HERE, "alarm.wav")   # drop your own recording here to use it
 BEEP_SOUND = os.path.join(HERE, ".beep.wav")
-NTFY_TOPIC = os.environ.get("NTFY_TOPIC", "")
 # Audio output. Empty = system default. For a USB speaker that plays over USB, find its card
 # name with `aplay -L | grep -i usb` and set e.g. AUDIO_DEVICE=plughw:CARD=Device,DEV=0
 # If it's empty, a plugged-in USB sound device is used automatically, else the system default.
@@ -207,17 +201,6 @@ def record(event, is_open=None, alarming=None, open_for=None, since=None):
                 print("can't write event:", e, file=sys.stderr)
 
 
-def notify(msg):
-    if not NTFY_TOPIC:
-        return
-    try:
-        req = urllib.request.Request(f"https://ntfy.sh/{NTFY_TOPIC}", data=msg.encode(),
-                                     headers={"Title": "Bidet alarm", "Priority": "high"})
-        urllib.request.urlopen(req, timeout=10)
-    except Exception as e:  # never let a network hiccup stop the local alarm
-        print("notify failed:", e, file=sys.stderr)
-
-
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--calibrate", action="store_true")
@@ -271,7 +254,6 @@ def main():
             if last_alarm is None or now - last_alarm >= REPEAT_EVERY:
                 if last_alarm is None:
                     record("alarm", alarming=True)
-                    notify(f"The bidet valve has been open for {int((now - opened_at) / 60)} min. Please turn it off.")
                 play_alarm()
                 last_alarm = time.monotonic()
         time.sleep(0.2)
