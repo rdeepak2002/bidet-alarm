@@ -174,7 +174,7 @@ parts = {}
 for b in LEVER_BORES:
     cap, cap_len = lever_cap(b)
     save(cap, f"lever_cap_{b:.1f}mm.stl")
-cap, cap_len = lever_cap(7.9)
+cap, cap_len = lever_cap(7.5)   # 7.5 mm cap is the one that fits (tested)
 cradle, cinfo = sensor_cradle()
 base, lid, einfo = enclosure()
 save(cradle, "sensor_cradle.stl")
@@ -195,7 +195,7 @@ lever = cyl(LEVER_D, LEVER_LEN, 24).translate([0, 0, -LEVER_LEN]).translate([0, 
 # so the flat (cap -y) faces the valve (+y) and the offset magnet sits away from it
 magnet_z = -LEVER_LEN + CAP_BORE_DEPTH - cap_len
 cap_asm = cap.rotate([0, 0, 180]).translate([0, LEVER_Y, magnet_z])
-MAGNET_Y = LEVER_Y - magnet_offset(7.9)   # cap is flipped in the assembly: offset points away from the valve (-y)
+MAGNET_Y = LEVER_Y - magnet_offset(7.5)   # cap is flipped in the assembly: offset points away from the valve (-y)
 magnet = cyl(MAGNET_D, MAGNET_H, 24).translate([0, MAGNET_Y, magnet_z + 0.1])
 # cradle: front faces -y (toward viewer); its sensor centre must line up under the lever (y = LEVER_Y)
 gap = 3.0
