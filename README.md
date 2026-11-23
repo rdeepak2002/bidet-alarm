@@ -59,6 +59,8 @@ The OS image itself isn't in this repo: it's about 500 MB and Raspberry Pi Image
 
 **http://bidet-alarm.local/** (on the home Wi-Fi) shows whether the valve is open, for how long, a countdown to the alarm, the recent history, and a button to play a test sound. It's served by the alarm itself (`pi/bidet_alarm.py` + `pi/status.html`), so if the page loads, the alarm is running. `.local` names work on Macs, iPhones and most PCs; if a device can't resolve it, use the Pi's IP instead.
 
+To add it to a phone's home screen as an app ("Bidet", water-drop icon): on iPhone open it in Safari → Share → **Add to Home Screen**; on Android open it in Chrome → ⋮ → **Add to Home screen**.
+
 ### Pi software
 
 - `pi/bidet_alarm.py`: `--calibrate` prints the sensor reading live, `--test` alarms after 10 s, no flag is the normal 10-minute run. It also serves the status page and finds a USB speaker by itself.
