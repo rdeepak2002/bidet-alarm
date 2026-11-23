@@ -37,7 +37,7 @@ On this board **D0 reads 1 when the magnet is near** (valve closed). That's set 
 
 | File | Print | Notes |
 |---|---|---|
-| `lever_cap_7.7mm.stl`, `7.9mm`, `8.1mm` | Magnet end down, 100% infill | Lever measured 7.7 mm. Print all three, keep the snug one (7.9 is the likely fit). |
+| `lever_cap_7.3mm.stl` … `8.1mm` | Magnet end down, 100% infill, brim | Lever measured 7.7 mm; 7.9 tested too loose. Print one at a time from 7.7 down and keep the first snug one. |
 | `ky024_holder.stl` | Upright, no supports | Board slides in from the top, pins down. Sized for a 34.7 × 15.3 mm board. |
 | `ky024_cover.stl` | Front face down, no supports | Splash guard; 0.8 mm roof over the sensor. |
 

@@ -27,7 +27,7 @@ SEG = 64
 # ------------------------------------------------------------------ PARAMETERS
 # Lever cap -- the lever looked ~6 mm thick in the video; several bores are printed.
 LEVER_D = 7.7                         # measured lever diameter (where the cap slides on)
-LEVER_BORES = [7.7, 7.9, 8.1]        # bore diameters to generate (printed holes shrink ~0.1-0.2 mm; 7.9 is the likely snug fit)
+LEVER_BORES = [7.3, 7.5, 7.7, 7.9, 8.1]   # bore diameters to generate (7.9 tested: too loose on the 7.7 mm lever)
 CAP_BORE_DEPTH = 9.0                 # how far the cap slides onto the lever (keep it below the knob disc)
 MAGNET_D, MAGNET_H = 12.0, 15.7      # ten stacked 12 mm discs (Caturledas pack), measured 15.7 mm tall
 MAGNET_FIT = 0.25                    # extra diameter for the magnet pocket
