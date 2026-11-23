@@ -8,7 +8,7 @@ Generates print/pi4_case_base.stl and print/pi4_case_lid.stl.
   - USB-C opening is oversized for a chunky power plug (USB_C_OPEN_W x USB_C_OPEN_H).
   - USB-A / Ethernet end is open (USB speaker plugs in there).
   - SD card can be pulled out through a notch at the other end.
-  - micro-HDMI is not exposed (the Pi runs headless); the 3.5 mm audio jack is.
+  - micro-HDMI and the 3.5 mm audio jack are covered (headless, USB speaker).
 
 Run:  python pi_case.py   (needs manifold3d trimesh numpy)
 Board coordinates follow the official Pi 4 drawing: x along the 85 mm edge from the SD-card end,
@@ -107,8 +107,6 @@ def base():
     # USB-C power (chunky plug)
     b -= box(11.2 - USB_C_OPEN_W / 2, OY0 - 1, max(FLOOR + 0.6, cz - USB_C_OPEN_H / 2),
              11.2 + USB_C_OPEN_W / 2, IN_Y0 + 1, cz + USB_C_OPEN_H / 2)
-    # 3.5 mm audio jack
-    b -= cyl(8.0, WALL + 2).rotate([-90, 0, 0]).translate([54.0, OY0 - 1, PCB_Z1 + 3.0])
     # USB-A + Ethernet end: open from just below the PCB to the top
     b -= box(IN_X1 - 1, 1.0, PCB_Z0 + 0.5, OX1 + 1, 55.5, LID_Z + 1)
     # SD card notch (finger pull)
