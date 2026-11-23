@@ -30,7 +30,11 @@
   li { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--line); }
   li:last-child { border:0; }
   li span:last-child { color:var(--muted); font-variant-numeric:tabular-nums; }
-  h2 { font-size:15px; margin:0 0 8px; }
+  h2 { font-size:15px; margin:0 0 8px; display:flex; justify-content:space-between; }
+  h2 span { color:var(--muted); font-weight:400; }
+  li small { color:var(--muted); margin-left:6px; }
+  .pager { display:flex; justify-content:space-between; align-items:center; margin-top:12px; color:var(--muted); font-size:14px; }
+  button:disabled { opacity:.4; cursor:default; }
   button { font:inherit; padding:8px 14px; border-radius:8px; border:1px solid var(--line); background:var(--card); color:var(--fg); cursor:pointer; }
   .foot { display:flex; justify-content:space-between; align-items:center; gap:12px; color:var(--muted); font-size:14px; }
 </style>
@@ -44,21 +48,32 @@
     <div class="bar" id="barWrap" hidden><div id="bar"></div></div>
   </div>
   <div class="card">
-    <h2>Recent</h2>
+    <h2>History <span id="count"></span></h2>
     <ul id="hist"></ul>
+    <div class="pager"><button id="prev">← Newer</button><span id="pageNo"></span><button id="next">Older →</button></div>
   </div>
-  <div class="foot">
-    <span id="seen"></span>
-    <button id="test">Play test sound</button>
-  </div>
+  <div class="foot"><span id="seen"></span></div>
 </main>
 <script>
 const $ = id => document.getElementById(id);
 const dur = s => { s = Math.max(0, Math.round(s)); const h = Math.floor(s/3600), m = Math.floor(s%3600/60), x = s%60;
   return h ? `${h} h ${m} min` : m ? `${m} min ${String(x).padStart(2,'0')} s` : `${x} s`; };
-const clock = t => new Date(t*1000).toLocaleString([], {weekday:'short', hour:'numeric', minute:'2-digit', second:'2-digit'});
-const label = {started:'Alarm started', opened:'Valve opened', closed:'Valve closed', alarm:'Alarm sounded'};
-let fails = 0;
+const clock = t => new Date(t*1000).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit', second:'2-digit'});
+const label = {started:'Alarm program started', opened:'Valve opened', closed:'Valve closed', alarm:'Alarm sounded'};
+let fails = 0, page = 1, lastCount = -1;
+const PER = 10;
+async function loadPage() {
+  const r = await fetch(`/api/events?page=${page}&per=${PER}`, {cache:'no-store'}); const d = await r.json();
+  if (page > d.pages) { page = d.pages; return loadPage(); }
+  $('hist').innerHTML = d.events.map(h => `<li><span>${label[h.event]||h.event}` +
+    (h.open_for != null ? `<small>after ${dur(h.open_for)}</small>` : '') +
+    `</span><span>${clock(h.t)}</span></li>`).join('') || '<li><span>No events yet</span></li>';
+  $('count').textContent = `${d.total} events`;
+  $('pageNo').textContent = `Page ${d.page} of ${d.pages}`;
+  $('prev').disabled = d.page <= 1; $('next').disabled = d.page >= d.pages;
+}
+$('prev').onclick = () => { page = Math.max(1, page - 1); loadPage(); };
+$('next').onclick = () => { page++; loadPage(); };
 async function tick() {
   try {
     const r = await fetch('/api/state', {cache:'no-store'}); const s = await r.json(); fails = 0;
@@ -71,7 +86,7 @@ async function tick() {
     $('barWrap').hidden = !open;
     $('bar').style.width = Math.min(100, 100*el/s.alarm_delay) + '%';
     $('bar').style.background = color;
-    $('hist').innerHTML = s.history.map(h => `<li><span>${label[h.event]||h.event}</span><span>${clock(h.t)}</span></li>`).join('');
+    if (s.latest !== lastCount) { lastCount = s.latest; loadPage(); }
     $('seen').textContent = 'Live · updated ' + new Date().toLocaleTimeString();
     document.title = (s.alarming ? 'ALARM' : open ? 'Open' : 'Closed') + ' · Bidet Alarm';
   } catch (e) {
@@ -79,7 +94,6 @@ async function tick() {
       $('detail').textContent = "Can't reach the Pi"; $('seen').textContent = ''; }
   }
 }
-$('test').onclick = () => fetch('/api/test-sound', {method:'POST'});
 tick(); setInterval(tick, 1000);
 </script>
 </body>

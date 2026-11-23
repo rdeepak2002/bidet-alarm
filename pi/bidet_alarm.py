@@ -22,16 +22,17 @@ Optional phone notification: set NTFY_TOPIC to a long random name, install the f
 name can read it, so make it unguessable.
 """
 import argparse
-import collections
 import json
 import math
 import os
+import sqlite3
 import struct
 import subprocess
 import sys
 import threading
 import time
 import urllib.request
+import urllib.parse
 import wave
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
@@ -60,8 +61,37 @@ STATIC = {"/manifest.json": "application/manifest+json", "/apple-touch-icon.png"
 # shared with the web page
 state = {"open": False, "since": time.time(), "alarming": False, "alarm_delay": ALARM_DELAY,
          "started": time.time(), "last_read": None}
-history = collections.deque(maxlen=30)
+# open/closed history in SQLite, so it survives restarts. Old rows are pruned automatically:
+# anything older than KEEP_DAYS, and anything beyond the newest MAX_EVENTS.
+DB_PATH = os.environ.get("DB_PATH", os.path.expanduser("~/bidet-alarm.db"))
+KEEP_DAYS = int(os.environ.get("KEEP_DAYS", "365"))
+MAX_EVENTS = int(os.environ.get("MAX_EVENTS", "10000"))
 lock = threading.Lock()
+db = None
+
+
+def open_db():
+    global db
+    db = sqlite3.connect(DB_PATH, check_same_thread=False)
+    db.execute("PRAGMA journal_mode=WAL")
+    db.execute("CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY, t REAL NOT NULL, "
+               "event TEXT NOT NULL, open_for INTEGER)")
+    db.execute("CREATE INDEX IF NOT EXISTS events_t ON events(t)")
+    prune()
+
+
+def prune():
+    db.execute("DELETE FROM events WHERE t < ?", (time.time() - KEEP_DAYS * 86400,))
+    db.execute("DELETE FROM events WHERE id <= (SELECT id FROM events ORDER BY id DESC LIMIT 1 OFFSET ?)",
+               (MAX_EVENTS,))
+    db.commit()
+
+
+def last_valve_event():
+    """The newest opened/closed row, to pick up where we left off after a restart."""
+    with lock:
+        return db.execute("SELECT t, event FROM events WHERE event IN ('opened','closed') "
+                          "ORDER BY id DESC LIMIT 1").fetchone()
 
 
 def make_beep(path):
@@ -111,7 +141,23 @@ class Web(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_GET(self):
-        if self.path in ("/", "/index.html"):
+        url = urllib.parse.urlparse(self.path)
+        q = urllib.parse.parse_qs(url.query)
+        if url.path == "/api/events":   # ?page=1&per=10, page 1 = newest
+            try:
+                page = max(1, int(q.get("page", ["1"])[0]))
+                per = min(100, max(1, int(q.get("per", ["10"])[0])))
+            except ValueError:
+                page, per = 1, 10
+            with lock:
+                total = db.execute("SELECT COUNT(*) FROM events").fetchone()[0]
+                rows = db.execute("SELECT t, event, open_for FROM events ORDER BY id DESC LIMIT ? OFFSET ?",
+                                  (per, (page - 1) * per)).fetchall()
+            items = [{"t": t, "event": e, "open_for": o} for t, e, o in rows]
+            pages = max(1, -(-total // per))
+            body = {"events": items, "page": page, "per": per, "total": total, "pages": pages}
+            self._send(200, json.dumps(body).encode(), "application/json")
+        elif self.path in ("/", "/index.html"):
             with open(PAGE, "rb") as f:
                 self._send(200, f.read(), "text/html; charset=utf-8")
         elif self.path in STATIC:
@@ -120,15 +166,9 @@ class Web(BaseHTTPRequestHandler):
                 self._send(200, f.read(), STATIC[self.path])
         elif self.path == "/api/state":
             with lock:
-                body = dict(state, now=time.time(), history=list(history))
+                n = db.execute("SELECT MAX(id) FROM events").fetchone()[0]
+                body = dict(state, now=time.time(), latest=n)
             self._send(200, json.dumps(body).encode(), "application/json")
-        else:
-            self._send(404, b"not found", "text/plain")
-
-    def do_POST(self):
-        if self.path == "/api/test-sound":
-            threading.Thread(target=play_alarm, daemon=True).start()
-            self._send(200, b"{}", "application/json")
         else:
             self._send(404, b"not found", "text/plain")
 
@@ -150,13 +190,19 @@ def start_web():
         return
 
 
-def record(event, is_open=None, alarming=None):
+def record(event, is_open=None, alarming=None, open_for=None, since=None):
+    now = time.time()
     with lock:
         if is_open is not None:
-            state["open"], state["since"] = is_open, time.time()
+            state["open"], state["since"] = is_open, since or now
         if alarming is not None:
             state["alarming"] = alarming
-        history.appendleft({"t": time.time(), "event": event})
+        if event:
+            try:
+                db.execute("INSERT INTO events (t, event, open_for) VALUES (?, ?, ?)", (now, event, open_for))
+                prune()
+            except sqlite3.Error as e:   # never let logging stop the alarm
+                print("can't write event:", e, file=sys.stderr)
 
 
 def notify(msg):
@@ -194,9 +240,16 @@ def main():
     state["alarm_delay"] = delay
     opened_at = last_alarm = None
     print(f"Running. Alarm after {delay} s open.")
+    open_db()
     start_web()
+    # resume after a restart: if the valve is still open, keep the original open time
+    last = last_valve_event()
+    if sensor.value != MAGNET_NEAR_VALUE and last and last[1] == "opened":
+        opened_at = time.monotonic() - (time.time() - last[0])
+        record(None, is_open=True, since=last[0])
+    elif sensor.value == MAGNET_NEAR_VALUE and last and last[1] == "closed":
+        record(None, is_open=False, since=last[0])
     record("started")
-    play_alarm() if args.test else None
 
     while True:
         is_open = sensor.value != MAGNET_NEAR_VALUE
@@ -206,9 +259,9 @@ def main():
             print(time.strftime("%H:%M:%S"), "valve OPEN")
             record("opened", is_open=True)
         elif not is_open and opened_at is not None:
-            opened_at = None
             print(time.strftime("%H:%M:%S"), "valve CLOSED")
-            record("closed", is_open=False, alarming=False)
+            record("closed", is_open=False, alarming=False, open_for=round(now - opened_at))
+            opened_at = None
         state["last_read"] = time.time()
         if opened_at is not None and now - opened_at >= delay:
             if last_alarm is None or now - last_alarm >= REPEAT_EVERY:
