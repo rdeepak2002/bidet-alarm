@@ -6,8 +6,8 @@ Generates print/pi4_case_base.stl and print/pi4_case_lid.stl.
   - No screws: the Pi drops onto 4 pegs in the base; 4 posts on the lid press it down.
   - Lid has a slot over the whole 40-pin header, so the KY-024 jumper wires plug in and exit upward.
   - USB-C opening is oversized for a chunky power plug (USB_C_OPEN_W x USB_C_OPEN_H).
-  - USB-A / Ethernet end is open (USB speaker plugs in there).
-  - SD card can be pulled out through a notch at the other end.
+  - One USB-A opening (lower USB 2.0 port) for the speaker; the other USB ports and Ethernet are covered.
+  - SD card stays inside: the SD end has room for an inserted card sticking out ~3 mm (plus 0.8 mm).
   - micro-HDMI and the 3.5 mm audio jack are covered (headless, USB speaker).
 
 Run:  python pi_case.py   (needs manifold3d trimesh numpy)
@@ -26,13 +26,15 @@ SEG = 48
 
 # ------------------------------------------------------------------ PARAMETERS
 USB_C_OPEN_W, USB_C_OPEN_H = 18.0, 12.5   # power plug opening (plug head must be smaller than this)
+USB_A_OPEN_W, USB_A_OPEN_H = 18.0, 11.0   # speaker plug opening: lower USB 2.0 port only
+USB_A_Y, USB_A_DZ = 9.0, 4.6              # that port's centre: y on the board, height above the PCB top
 WALL, FLOOR, LID_T = 2.0, 2.0, 2.0
 STANDOFF = 4.0          # floor top -> PCB bottom
 PCB_T = 1.5
 TOP_CLEAR = 1.0         # tallest part (USB stack, 16 mm) -> lid underside
 FIT = 0.25              # lid lip clearance
 # inside of the box, in board coordinates (board is 0..85 x 0..56)
-IN_X0, IN_X1 = -3.0, 85.5   # SD end has 3 mm so the card clears the wall
+IN_X0, IN_X1 = -4.0, 88.0   # SD end: inserted card (sticks out ~2.5-3 mm) clears the wall; port end: USB/Ethernet fronts (to 87.6) clear it
 IN_Y0, IN_Y1 = -3.0, 57.0   # port side has 3 mm for the HDMI/audio/USB-C fronts
 HOLES = [(3.5, 3.5), (61.5, 3.5), (3.5, 52.5), (61.5, 52.5)]
 # ---------------------------------------------------------------------------
@@ -75,7 +77,7 @@ def pi4_model():
         box(65.0, 37.7, t, 87.6, 53.8, t + 13.6),       # Ethernet
         box(7.1, 49.9, t, 57.9, 55.1, t + 8.5),         # 40-pin header
         box(7.1, 49.9, t, 57.9, 55.1, t + 2.5 + 14.0),  # Dupont housings on the header
-        box(-2.6, 21.0, PCB_Z0 - 1.6, 13.0, 35.0, PCB_Z0),  # SD socket + card
+        box(-3.2, 21.0, PCB_Z0 - 2.0, 13.0, 35.0, PCB_Z0),  # SD socket + inserted card (sticks out ~3 mm)
         box(5, 5, PCB_Z0 - 1.5, 80, 51, PCB_Z0),        # misc underside parts
     ]
     m = _union(parts)
@@ -107,10 +109,10 @@ def base():
     # USB-C power (chunky plug)
     b -= box(11.2 - USB_C_OPEN_W / 2, OY0 - 1, max(FLOOR + 0.6, cz - USB_C_OPEN_H / 2),
              11.2 + USB_C_OPEN_W / 2, IN_Y0 + 1, cz + USB_C_OPEN_H / 2)
-    # USB-A + Ethernet end: open from just below the PCB to the top
-    b -= box(IN_X1 - 1, 1.0, PCB_Z0 + 0.5, OX1 + 1, 55.5, LID_Z + 1)
-    # SD card notch (finger pull)
-    b -= box(OX0 - 1, 19.0, FLOOR + 0.5, IN_X0 + 1, 37.0, PCB_Z1 + 1.5)
+    # one USB-A opening (lower USB 2.0 port) for the speaker; the rest of that end stays closed
+    az = PCB_Z1 + USB_A_DZ
+    b -= box(IN_X1 - 1, USB_A_Y - USB_A_OPEN_W / 2, az - USB_A_OPEN_H / 2,
+             OX1 + 1, USB_A_Y + USB_A_OPEN_W / 2, az + USB_A_OPEN_H / 2)
     # floor vents
     for i in range(7):
         x = 14 + i * 6
@@ -153,6 +155,10 @@ if __name__ == "__main__":
     print(f"lid vs base       {vol(L ^ B):.1f} mm^3")
     for w, h in [(12, 7), (16, 10), (17.5, 12)]:
         print(f"USB-C plug head {w:>4} x {h:<4} mm vs case: {vol((B + L) ^ plug_envelope(w, h)):.1f} mm^3")
+    az = PCB_Z1 + USB_A_DZ
+    for w, h in [(16, 8), (17.5, 10.5)]:
+        plug = box(87.3, USB_A_Y - w / 2, az - h / 2, 87.3 + 30, USB_A_Y + w / 2, az + h / 2)
+        print(f"USB-A plug head {w:>4} x {h:<4} mm vs case: {vol((B + L) ^ plug):.1f} mm^3")
     # Pi must drop straight down into the base: sweep it upward and check
     sweep = _union([P.translate([0, 0, dz]) for dz in np.arange(0, LID_Z, 2.0)])
     print(f"drop-in sweep     {vol(B ^ sweep):.1f} mm^3")
