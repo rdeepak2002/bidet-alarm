@@ -234,6 +234,8 @@ def main():
         record(None, is_open=True, since=last[0])
     elif sensor.value == MAGNET_NEAR_VALUE and last and last[1] == "closed":
         record(None, is_open=False, since=last[0])
+    elif sensor.value == MAGNET_NEAR_VALUE and last and last[1] == "opened":
+        record("closed", is_open=False)   # it was closed while this program wasn't running
     record("started")
     if args.test:
         play_alarm()   # one beep straight away, to check the speaker
