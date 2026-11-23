@@ -128,6 +128,9 @@ def lid():
     lip_in = rrect(IN_X0 + FIT + 1.2, IN_Y0 + FIT + 1.2, IN_X1 + 5, IN_Y1 - FIT - 1.2, lz - 4, lz + 1, 1)
     lip = (lip_out - lip_in) - box(62, IN_Y0 - 5, lz - 5, IN_X1 + 5, IN_Y1 + 5, lz + 1)
     l += lip
+    # port end: two corner tabs (clear of the USB/Ethernet fronts) stop the lid sliding that way
+    for y0, y1 in ((IN_Y0 + 1.2, 1.6), (54.6, IN_Y1 - 1.2)):   # kept off the rounded inner corners
+        l += box(IN_X1 - FIT - 1.2, y0, lz - 3, IN_X1 - FIT, y1, lz + 0.01)
     # hold-down posts onto the PCB at the 4 mounting holes
     for x, y in HOLES:
         l += cyl(4.5, lz - PCB_Z1 - 0.2 + 0.01).translate([x, y, PCB_Z1 + 0.2])
