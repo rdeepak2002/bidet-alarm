@@ -40,6 +40,7 @@ MAGNET_NEAR_VALUE = int(os.environ.get("MAGNET_NEAR_VALUE", "1"))   # this KY-02
 
 ALARM_DELAY = 10 * 60       # seconds the valve may stay open
 REPEAT_EVERY = 30           # seconds between repeated alarms
+DEBOUNCE = 1.0              # a change must hold this long to count (ignores bumps and glitches)
 HERE = os.path.dirname(os.path.abspath(__file__))
 CUSTOM_SOUND = os.path.join(HERE, "alarm.wav")   # drop your own recording here to use it
 BEEP_SOUND = os.path.join(HERE, ".beep.wav")
@@ -228,6 +229,7 @@ def main():
     open_db()
     start_web()
     # resume after a restart: if the valve is still open, keep the original open time
+    time.sleep(DEBOUNCE)   # let the sensor settle before the first reading
     last = last_valve_event()
     if sensor.value != MAGNET_NEAR_VALUE and last and last[1] == "opened":
         opened_at = time.monotonic() - (time.time() - last[0])
@@ -240,9 +242,15 @@ def main():
     if args.test:
         play_alarm()   # one beep straight away, to check the speaker
 
+    candidate, candidate_since = None, 0.0
+    is_open = sensor.value != MAGNET_NEAR_VALUE   # stable state; flicker shorter than DEBOUNCE is ignored
     while True:
-        is_open = sensor.value != MAGNET_NEAR_VALUE
+        raw_open = sensor.value != MAGNET_NEAR_VALUE
         now = time.monotonic()
+        if raw_open != candidate:
+            candidate, candidate_since = raw_open, now
+        if now - candidate_since >= DEBOUNCE:
+            is_open = candidate
         if is_open and opened_at is None:
             opened_at, last_alarm = now, None
             print(time.strftime("%H:%M:%S"), "valve OPEN")
