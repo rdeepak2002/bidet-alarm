@@ -21,6 +21,7 @@ import argparse
 import json
 import math
 import os
+import socket
 import sqlite3
 import struct
 import subprocess
@@ -169,14 +170,14 @@ class Web(BaseHTTPRequestHandler):
             pages = max(1, -(-total // per))
             body = {"events": items, "page": page, "per": per, "total": total, "pages": pages}
             self._send(200, json.dumps(body).encode(), "application/json")
-        elif self.path in ("/", "/index.html"):
+        elif url.path in ("/", "/index.html"):
             with open(PAGE, "rb") as f:
                 self._send(200, f.read(), "text/html; charset=utf-8")
-        elif self.path in STATIC:
-            name = "favicon-32.png" if self.path == "/favicon.ico" else self.path[1:]
+        elif url.path in STATIC:
+            name = "favicon-32.png" if url.path == "/favicon.ico" else url.path[1:]
             with open(os.path.join(HERE, name), "rb") as f:
-                self._send(200, f.read(), STATIC[self.path])
-        elif self.path == "/api/state":
+                self._send(200, f.read(), STATIC[url.path])
+        elif url.path == "/api/state":
             with lock:
                 n = db.execute("SELECT MAX(id) FROM events WHERE event != 'started'").fetchone()[0]
                 body = dict(state, now=time.time(), latest=n)
@@ -188,12 +189,26 @@ class Web(BaseHTTPRequestHandler):
         pass
 
 
+class DualStackServer(ThreadingHTTPServer):
+    """Listens on IPv6 and IPv4. bidet-alarm.local resolves to both, and browsers try IPv6
+    first; an IPv4-only server makes every new connection wait for the fallback."""
+    address_family = socket.AF_INET6
+    daemon_threads = True
+
+    def server_bind(self):
+        self.socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
+        super().server_bind()
+
+
 def start_web():
     for port in ([WEB_PORT, 8080] if WEB_PORT == 80 else [WEB_PORT]):
         if not port:
             return
         try:
-            srv = ThreadingHTTPServer(("", port), Web)
+            try:
+                srv = DualStackServer(("::", port), Web)
+            except OSError:
+                srv = ThreadingHTTPServer(("", port), Web)   # no IPv6 on this system
         except OSError as e:
             print(f"status page: can't use port {port} ({e})", file=sys.stderr)
             continue
