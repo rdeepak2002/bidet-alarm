@@ -77,7 +77,7 @@ holder = ky024_holder()
 
 # ------------------------------------------------------------------ cover (splash / condensation / bump protection)
 COVER_WALL = 1.6
-COMP_H = 10.0        # tallest part on the board's front (the threshold potentiometer)
+COMP_H = 13.5        # room in front of the board: trimmer + its screw measured taller than 10 mm (cover jammed)
 
 
 def ky024_cover():
@@ -97,7 +97,7 @@ cover = ky024_cover()
 
 # reference KY-024 board for the viewer
 board = box(-KY_W / 2, y_f, board_z0, KY_W / 2, y_b, pcb_top_z)
-board_parts = box(-5, y_f - 10, board_z0 + 14.5, 5, y_f, board_z0 + 25.5)     # blue trimmer (measured from photo)
+board_parts = box(-5, y_f - 11.5, board_z0 + 14.5, 5, y_f, board_z0 + 25.5)   # blue trimmer + screw (~11.5 mm tall, jammed a 10 mm cover)
 board_parts += box(-2.5, y_f - 2, board_z0 + 18, 2.5, y_f, board_z0 + 22)     # comparator chip
 board_parts += box(-5.1, y_f - 2.6, board_z0, 5.1, y_f, board_z0 + 2.6)       # right-angle header body
 hall = box(-2, y_f - HALL_OUT, sensor_face_z - 3.0, 2, y_f, sensor_face_z)   # TO-92 standing upright in the slot
