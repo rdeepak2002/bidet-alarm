@@ -42,7 +42,6 @@ tray_top = pcb_top_z - PCB_PROUD
 STOP_H = 1.5                                       # the board's header end rests on two stops this tall
 tray_bot = pcb_top_z - KY_L - STOP_H
 board_z0 = tray_bot + STOP_H                       # board's header end
-POT_SCREW, POT_X = 16.3, 3.5                       # trimmer screw: mm from the header end, and sideways (photo)
 y_f = LEVER_Y + HALL_OUT / 2                       # board's component face: the upright sensor's centre lines up under the magnet
 y_b = y_f + PCB_T                                  # board's back face (toward the hose)
 r = PIPE_D / 2
@@ -85,7 +84,6 @@ def ky024_cover():
     yi = y_f - COMP_H                           # inside front face
     shell = box(-xi - COVER_WALL, yi - COVER_WALL, tray_bot + 2, xi + COVER_WALL, y_back, z_roof + ROOF)
     shell -= box(-xi, yi, tray_bot, xi, y_back + 1, z_roof)          # open back (hose side) and bottom (cable, drainage)
-    shell -= cyl(4.5, 20, 24).rotate([90, 0, 0]).translate([POT_X, yi + 5, board_z0 + POT_SCREW])   # screwdriver hole for the threshold pot
     for zc in (tray_bot + 8, tray_top - 8):                         # zip ties pass through the sides, into the tunnels
         shell -= box(-xi - COVER_WALL - 1, y_b + 0.6, zc - 2.8, xi + COVER_WALL + 1, y_b + 3.0, zc + 2.8)
     # recess for the coupling nut above (cover top sits just below it); Hall sensor stays covered
