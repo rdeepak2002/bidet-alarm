@@ -46,7 +46,8 @@ CUSTOM_SOUND = os.path.join(HERE, "alarm.wav")   # drop your own recording here 
 BEEP_SOUND = os.path.join(HERE, ".beep.wav")
 # Audio output. Empty = system default. For a USB speaker that plays over USB, find its card
 # name with `aplay -L | grep -i usb` and set e.g. AUDIO_DEVICE=plughw:CARD=Device,DEV=0
-# If it's empty, a plugged-in USB sound device is used automatically, else the system default.
+# If it's empty, a plugged-in USB sound device is used automatically (set to 100% volume each time
+# it plays), else the system default.
 AUDIO_DEVICE = os.environ.get("AUDIO_DEVICE", "")
 WEB_PORT = int(os.environ.get("WEB_PORT", "80"))
 PAGE = os.path.join(HERE, "status.html")
@@ -118,11 +119,25 @@ def audio_device():
     return ""
 
 
+def max_volume(dev):
+    """Turn every playback control on the speaker's sound card to 100% and unmute it."""
+    card = dev.split("CARD=")[1].split(",")[0] if "CARD=" in dev else ""
+    if not card:
+        return
+    try:
+        out = subprocess.run(["amixer", "-c", card, "scontrols"], capture_output=True, text=True, timeout=5).stdout
+        for name in [line.split("'")[1] for line in out.splitlines() if "'" in line]:
+            subprocess.run(["amixer", "-q", "-c", card, "sset", name, "100%", "unmute"], capture_output=True, timeout=5)
+    except Exception as e:   # volume is a nice-to-have; never block the alarm on it
+        print("volume:", e, file=sys.stderr)
+
+
 def play_alarm():
     sound = CUSTOM_SOUND if os.path.exists(CUSTOM_SOUND) else BEEP_SOUND
     if not os.path.exists(sound):
         make_beep(BEEP_SOUND)
     dev = audio_device()
+    max_volume(dev)   # USB speaker at full volume every time
     cmd = ["aplay", "-q"] + (["-D", dev] if dev else []) + [sound]
     subprocess.run(cmd, check=False)
 
