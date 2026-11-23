@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bidet Alarm</title>
+<style>
+  :root { --bg:#f4f5f7; --fg:#1d2330; --muted:#5d6678; --card:#fff; --line:#dde1e8;
+          --ok:#1f9d55; --warn:#d98a00; --bad:#d63a3a; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#13161b; --fg:#e7eaf0; --muted:#9aa3b5; --card:#1d2129; --line:#2c323d; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.5 system-ui,-apple-system,sans-serif; }
+  main { max-width:560px; margin:0 auto; padding:24px 16px 40px; }
+  h1 { font-size:20px; margin:0 0 16px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px; margin-bottom:14px; }
+  #status { text-align:center; padding:32px 20px; border-width:2px; }
+  #big { font-size:44px; font-weight:700; letter-spacing:.5px; }
+  #detail { color:var(--muted); margin-top:4px; }
+  .bar { height:10px; background:var(--line); border-radius:6px; overflow:hidden; margin-top:18px; }
+  .bar div { height:100%; width:0; background:var(--warn); transition:width .5s; }
+  ul { list-style:none; margin:0; padding:0; }
+  li { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--line); }
+  li:last-child { border:0; }
+  li span:last-child { color:var(--muted); font-variant-numeric:tabular-nums; }
+  h2 { font-size:15px; margin:0 0 8px; }
+  button { font:inherit; padding:8px 14px; border-radius:8px; border:1px solid var(--line); background:var(--card); color:var(--fg); cursor:pointer; }
+  .foot { display:flex; justify-content:space-between; align-items:center; gap:12px; color:var(--muted); font-size:14px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Bidet valve</h1>
+  <div class="card" id="status">
+    <div id="big">…</div>
+    <div id="detail">Connecting to the Pi</div>
+    <div class="bar" id="barWrap" hidden><div id="bar"></div></div>
+  </div>
+  <div class="card">
+    <h2>Recent</h2>
+    <ul id="hist"></ul>
+  </div>
+  <div class="foot">
+    <span id="seen"></span>
+    <button id="test">Play test sound</button>
+  </div>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const dur = s => { s = Math.max(0, Math.round(s)); const h = Math.floor(s/3600), m = Math.floor(s%3600/60), x = s%60;
+  return h ? `${h} h ${m} min` : m ? `${m} min ${String(x).padStart(2,'0')} s` : `${x} s`; };
+const clock = t => new Date(t*1000).toLocaleString([], {weekday:'short', hour:'numeric', minute:'2-digit', second:'2-digit'});
+const label = {started:'Alarm started', opened:'Valve opened', closed:'Valve closed', alarm:'Alarm sounded'};
+let fails = 0;
+async function tick() {
+  try {
+    const r = await fetch('/api/state', {cache:'no-store'}); const s = await r.json(); fails = 0;
+    const open = s.open, el = s.now - s.since, color = s.alarming ? 'var(--bad)' : open ? 'var(--warn)' : 'var(--ok)';
+    $('big').textContent = s.alarming ? 'ALARM' : open ? 'OPEN' : 'CLOSED';
+    $('big').style.color = color; $('status').style.borderColor = color;
+    $('detail').textContent = open
+      ? `Open for ${dur(el)}` + (s.alarming ? ', please turn it off' : `, alarm in ${dur(s.alarm_delay - el)}`)
+      : `Closed for ${dur(el)}`;
+    $('barWrap').hidden = !open;
+    $('bar').style.width = Math.min(100, 100*el/s.alarm_delay) + '%';
+    $('bar').style.background = color;
+    $('hist').innerHTML = s.history.map(h => `<li><span>${label[h.event]||h.event}</span><span>${clock(h.t)}</span></li>`).join('');
+    $('seen').textContent = 'Live · updated ' + new Date().toLocaleTimeString();
+    document.title = (s.alarming ? 'ALARM' : open ? 'Open' : 'Closed') + ' · Bidet Alarm';
+  } catch (e) {
+    if (++fails > 2) { $('big').textContent = 'OFFLINE'; $('big').style.color = 'var(--muted)';
+      $('detail').textContent = "Can't reach the Pi"; $('seen').textContent = ''; }
+  }
+}
+$('test').onclick = () => fetch('/api/test-sound', {method:'POST'});
+tick(); setInterval(tick, 1000);
+</script>
+</body>
+</html>

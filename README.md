@@ -55,9 +55,14 @@ The OS image itself isn't in this repo: it's about 500 MB and Raspberry Pi Image
 3. Put the card in the Pi and power it on. First boot takes 2-3 minutes.
 4. Run `./pi/setup_from_mac.sh`. It waits for `bidet-alarm.local`, checks SSH and Wi-Fi, copies this repo to the Pi and installs `gpiozero`, `lgpio` and `alsa-utils`. After that, `ssh bidet-alarm` logs straight in. (On a new Mac, first add the `Host bidet-alarm` block from the top of `pi/setup_from_mac.sh` to `~/.ssh/config`.)
 
+### Status page
+
+**http://bidet-alarm.local/** (on the home Wi-Fi) shows whether the valve is open, for how long, a countdown to the alarm, the recent history, and a button to play a test sound. It's served by the alarm itself (`pi/bidet_alarm.py` + `pi/status.html`), so if the page loads, the alarm is running. `.local` names work on Macs, iPhones and most PCs; if a device can't resolve it, use the Pi's IP instead.
+
 ### Pi software
 
-- `pi/bidet_alarm.py`: `--calibrate` prints the sensor reading live, `--test` alarms after 10 s, no flag is the normal 10-minute run.
+- `pi/bidet_alarm.py`: `--calibrate` prints the sensor reading live, `--test` alarms after 10 s, no flag is the normal 10-minute run. It also serves the status page and finds a USB speaker by itself.
+- `pi/status.html`: the status page.
 - `pi/bidet-alarm.service`: starts the alarm at boot (`sudo cp pi/bidet-alarm.service /etc/systemd/system/ && sudo systemctl enable --now bidet-alarm`).
 - `pi/prepare_sd_card.sh`, `pi/setup_from_mac.sh`, `pi/firstboot/`: the setup steps above.
 
