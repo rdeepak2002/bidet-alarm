@@ -86,8 +86,8 @@ def ky024_cover():
     shell -= box(-xi, yi, tray_bot, xi, y_back + 1, z_roof)          # open back (hose side) and bottom (cable, drainage)
     for zc in (tray_bot + 8, tray_top - 8):                         # zip ties pass through the sides, into the tunnels
         shell -= box(-xi - COVER_WALL - 1, y_b + 0.6, zc - 2.8, xi + COVER_WALL + 1, y_b + 3.0, zc + 2.8)
-    # recess for the coupling nut above (cover top sits just below it); Hall sensor stays covered
-    shell -= cyl(g["NUT_D"] + 1.0, 30).translate([0, 0, z_roof - 2])
+    # shallow notch in the roof's back edge where it meets the hose (the nut is far above now)
+    shell -= cyl(PIPE_D + 1.0, 200).translate([0, 0, -100])
     return shell
 
 
