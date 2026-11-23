@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pi 4 Case</title>
+<style>
+  :root { --bg:#f6f7f9; --fg:#1d2330; --muted:#5d6678; --card:#fff; --line:#dde1e8; --accent:#2f6fde; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#14171d; --fg:#e7eaf0; --muted:#9aa3b5; --card:#1d2129; --line:#2c323d; --accent:#6c9cff; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 system-ui, -apple-system, sans-serif; }
+  main { max-width:1100px; margin:0 auto; padding:20px 16px 40px; }
+  h1 { font-size:24px; margin:0 0 4px; }
+  .sub { color:var(--muted); margin:0 0 16px; }
+  #view { width:100%; height:min(62vh,560px); background:var(--card); border:1px solid var(--line); border-radius:12px; overflow:hidden; touch-action:none; }
+  .bar { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0 20px; }
+  button { font:inherit; padding:7px 14px; border-radius:8px; border:1px solid var(--line); background:var(--card); color:var(--fg); cursor:pointer; }
+  button.on { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 16px; }
+  .card h3 { margin:0 0 6px; font-size:15px; }
+  .card p, .card li { margin:0; color:var(--muted); font-size:14px; }
+  .card ul { margin:0; padding-left:18px; }
+  .sw { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:6px; vertical-align:middle; }
+  a { color:var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Raspberry Pi 4 case</h1>
+  <p class="sub">For the bidet alarm. Two parts, no screws. Drag to rotate, scroll or pinch to zoom.
+    <a href="index.html">← Back to the build plan</a></p>
+
+  <div id="view"></div>
+  <div class="bar">
+    <button id="bLid" class="on">Lid</button>
+    <button id="bExplode">Lift lid</button>
+    <button id="bPi" class="on">Pi</button>
+    <button id="bBase" class="on">Base</button>
+  </div>
+
+  <div class="grid">
+    <div class="card"><h3><span class="sw" style="background:#5b8def"></span>Base, <code>print/pi4_case_base.stl</code></h3>
+      <p>Print open side up, no supports. The Pi drops onto 4 pegs.</p></div>
+    <div class="card"><h3><span class="sw" style="background:#f0a030"></span>Lid, <code>print/pi4_case_lid.stl</code></h3>
+      <p>Print top face down, no supports. The 4 posts press the Pi onto the pegs and the lip keeps the lid in place.</p></div>
+    <div class="card"><h3>Openings</h3><ul>
+      <li>USB-C power: 18 × 12.5 mm, fits a chunky plug</li>
+      <li>USB-A and Ethernet end: fully open (USB speaker)</li>
+      <li>Lid slot over the whole 40-pin header (▲ marks pin 1)</li>
+      <li>SD card notch, 3.5 mm audio jack, vents on top and bottom</li>
+    </ul></div>
+    <div class="card"><h3>Size</h3><p>92.5 × 64 × 26.5 mm closed. Micro-HDMI is covered, since the Pi runs headless.</p></div>
+  </div>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>
+<script>
+const el = document.getElementById('view');
+const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(devicePixelRatio);
+renderer.setClearColor(dark ? 0x1d2129 : 0xffffff);
+el.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+const cam = new THREE.PerspectiveCamera(35, 1, 1, 2000);
+cam.up.set(0,0,1);
+cam.position.set(-60, -150, 130);
+const ctl = new THREE.OrbitControls(cam, renderer.domElement);
+ctl.target.set(42, 28, 12); ctl.enableDamping = true;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x445566, 0.75));
+const d = new THREE.DirectionalLight(0xffffff, 0.65); d.position.set(-80,-120,200); scene.add(d);
+const d2 = new THREE.DirectionalLight(0xffffff, 0.3); d2.position.set(150,100,80); scene.add(d2);
+
+const parts = {};
+const loader = new THREE.STLLoader();
+function load(name, url, color, opts={}) {
+  loader.load(url, g => {
+    g.computeVertexNormals();
+    const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({color, roughness:0.6, metalness:0.05,
+      transparent:!!opts.opacity, opacity:opts.opacity||1}));
+    parts[name] = m; scene.add(m); apply();
+  });
+}
+load('base', '../print/pi4_case_base.stl', 0x5b8def);
+load('pi', 'pi4_model.stl', 0x2e9e55);
+load('lid', 'pi4_case_lid_assembled.stl', 0xf0a030, {opacity:0.92});
+
+const state = {lid:true, pi:true, base:true, explode:false};
+function apply() {
+  for (const k of ['lid','pi','base']) if (parts[k]) parts[k].visible = state[k];
+  if (parts.lid) parts.lid.position.z = state.explode ? 30 : 0;
+  for (const [id,k] of [['bLid','lid'],['bPi','pi'],['bBase','base'],['bExplode','explode']])
+    document.getElementById(id).classList.toggle('on', state[k]);
+}
+for (const [id,k] of [['bLid','lid'],['bPi','pi'],['bBase','base'],['bExplode','explode']])
+  document.getElementById(id).onclick = () => { state[k] = !state[k]; apply(); };
+state.explode = true; apply();
+
+function resize() { const w = el.clientWidth, h = el.clientHeight; renderer.setSize(w,h); cam.aspect = w/h; cam.updateProjectionMatrix(); }
+addEventListener('resize', resize); resize();
+(function loop(){ ctl.update(); renderer.render(scene, cam); requestAnimationFrame(loop); })();
+</script>
+</body>
+</html>

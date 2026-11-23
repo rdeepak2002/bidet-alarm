@@ -37,7 +37,9 @@ On this board **D0 reads 1 when the magnet is near** (valve closed). That's set 
 
 | File | Print | Notes |
 |---|---|---|
-| `lever_cap_7.3mm.stl` … `8.1mm` | Magnet end down, 100% infill, brim | Lever measured 7.7 mm; 7.9 tested too loose. Print one at a time from 7.7 down and keep the first snug one. |
+| `lever_cap_7.3mm.stl` … `8.1mm` | Magnet end down, 100% infill, brim | Lever measured 7.7 mm; 7.9 and 7.7 tested too loose. Print one at a time from 7.5 down and keep the first snug one. |
+| `pi4_case_base.stl` | Open side up, no supports | Pi 4 case base. The Pi drops onto 4 pegs; USB-A end open, 18 × 12.5 mm USB-C opening for chunky plugs. |
+| `pi4_case_lid.stl` | Top face down, no supports | Lid with a slot over the 40-pin header (▲ = pin 1) and posts that hold the Pi down. 3D view: `pi-design/case.html`. |
 | `ky024_holder.stl` | Upright, no supports | Board slides in from the top, pins down. Sized for a 34.7 × 15.3 mm board. |
 | `ky024_cover.stl` | Front face down, no supports | Splash guard; 0.8 mm roof over the sensor. |
 
