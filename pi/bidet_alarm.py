@@ -56,7 +56,8 @@ AUDIO_DEVICE = os.environ.get("AUDIO_DEVICE", "")
 WEB_PORT = int(os.environ.get("WEB_PORT", "80"))
 PAGE = os.path.join(HERE, "status.html")
 STATIC = {"/manifest.json": "application/manifest+json", "/apple-touch-icon.png": "image/png",
-          "/icon-192.png": "image/png", "/icon-512.png": "image/png", "/favicon.ico": "image/png"}
+          "/icon-192.png": "image/png", "/icon-512.png": "image/png", "/favicon.svg": "image/svg+xml",
+          "/favicon-32.png": "image/png", "/favicon.ico": "image/png"}
 
 # shared with the web page
 state = {"open": False, "since": time.time(), "alarming": False, "alarm_delay": ALARM_DELAY,
@@ -162,7 +163,7 @@ class Web(BaseHTTPRequestHandler):
             with open(PAGE, "rb") as f:
                 self._send(200, f.read(), "text/html; charset=utf-8")
         elif self.path in STATIC:
-            name = "icon-192.png" if self.path == "/favicon.ico" else self.path[1:]
+            name = "favicon-32.png" if self.path == "/favicon.ico" else self.path[1:]
             with open(os.path.join(HERE, name), "rb") as f:
                 self._send(200, f.read(), STATIC[self.path])
         elif self.path == "/api/state":
