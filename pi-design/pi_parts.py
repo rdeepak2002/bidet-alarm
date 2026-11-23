@@ -76,14 +76,16 @@ holder = ky024_holder()
 
 # ------------------------------------------------------------------ cover (splash / condensation / bump protection)
 COVER_WALL = 1.6
+PLUG_LEN = 16.0      # header pins + Dupont plugs stick out this far past the board's end
 COMP_H = 13.5        # room in front of the board: trimmer + its screw measured taller than 10 mm (cover jammed)
 
 
 def ky024_cover():
     xi = xo + rail + 0.25                       # slides over the holder with 0.25 mm clearance
     yi = y_f - COMP_H                           # inside front face
-    shell = box(-xi - COVER_WALL, yi - COVER_WALL, tray_bot + 2, xi + COVER_WALL, y_back, z_roof + ROOF)
-    shell -= box(-xi, yi, tray_bot, xi, y_back + 1, z_roof)          # open back (hose side) and bottom (cable, drainage)
+    z_bot = board_z0 - PLUG_LEN - 1.0             # skirt reaches past the Dupont plugs so they're hidden
+    shell = box(-xi - COVER_WALL, yi - COVER_WALL, z_bot, xi + COVER_WALL, y_back, z_roof + ROOF)
+    shell -= box(-xi, yi, z_bot - 1, xi, y_back + 1, z_roof)        # open back (hose side) and bottom (cable, drainage)
     for zc in (tray_bot + 8, tray_top - 8):                         # zip ties pass through the sides, into the tunnels
         shell -= box(-xi - COVER_WALL - 1, y_b + 0.6, zc - 2.8, xi + COVER_WALL + 1, y_b + 3.0, zc + 2.8)
     # shallow notch in the roof's back edge where it meets the hose (the nut is far above now)
@@ -100,7 +102,7 @@ board_parts += box(-2.5, y_f - 2, board_z0 + 18, 2.5, y_f, board_z0 + 22)     # 
 board_parts += box(-5.1, y_f - 2.6, board_z0, 5.1, y_f, board_z0 + 2.6)       # right-angle header body
 hall = box(-2, y_f - HALL_OUT, sensor_face_z - 3.0, 2, y_f, sensor_face_z)   # TO-92 standing upright in the slot
 legs = box(-1.5, y_f - 0.5, sensor_face_z - 4.0, 1.5, y_f + 0.01, sensor_face_z - 3.0)
-pins = box(-5.1, y_f - 2.6, board_z0 - 16, 5.1, y_f, board_z0)               # pins + Dupont plugs, straight out the end
+pins = box(-5.1, y_f - 2.6, board_z0 - PLUG_LEN, 5.1, y_f, board_z0)               # pins + Dupont plugs, straight out the end
 
 # exports (print orientation: standing upright on z = 0)
 save = lambda m, name: to_trimesh(m).export(os.path.join(OUT, name))
