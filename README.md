@@ -53,19 +53,36 @@ The OS image itself isn't in this repo: it's about 500 MB and Raspberry Pi Image
 1. In **Raspberry Pi Imager**, pick Raspberry Pi 4 → **Raspberry Pi OS Lite (64-bit)** → the microSD card, choose **no customisation**, and write it.
 2. With the card still in the Mac, run `./pi/prepare_sd_card.sh <wifi-name>`. It asks for the Wi-Fi password in a macOS dialog and writes the first-boot settings to the card: hostname `bidet-alarm`, user `pi` with your Mac's SSH key (no password login), Wi-Fi, US/Pacific time. The Wi-Fi password is stored on the card only as a WPA key hash and never in this repo. Then it ejects the card.
 3. Put the card in the Pi and power it on. First boot takes 2-3 minutes.
-4. Run `./pi/setup_from_mac.sh`. It waits for `bidet-alarm.local`, checks SSH and Wi-Fi, copies this repo to the Pi and installs `gpiozero`, `lgpio` and `alsa-utils`. After that, `ssh bidet-alarm` logs straight in. (On a new Mac, first add the `Host bidet-alarm` block from the top of `pi/setup_from_mac.sh` to `~/.ssh/config`.)
+4. Run `./pi/setup_from_mac.sh`. It waits for `bidet-alarm.local`, checks SSH and Wi-Fi, copies this repo to the Pi, installs `gpiozero`, `lgpio` and `alsa-utils`, and installs and starts the alarm service. After that, `ssh bidet-alarm` logs straight in and the status page is up at http://bidet-alarm.local/. (On a new Mac, first add the `Host bidet-alarm` block from the top of `pi/setup_from_mac.sh` to `~/.ssh/config`.)
+5. Shut the Pi down (`ssh bidet-alarm sudo poweroff`), wire the KY-024 (see [Wiring](#wiring)), plug the USB speaker into the lower USB 2.0 port (black) and power it back on.
+6. Check the sensor: `ssh bidet-alarm`, then `sudo systemctl stop bidet-alarm` (frees the sensor pin), `python3 bidet-alarm/pi/bidet_alarm.py --calibrate`, move the magnet, Ctrl+C, then `sudo systemctl start bidet-alarm`.
+7. Check the alarm and speaker: with the service stopped the same way, `python3 bidet-alarm/pi/bidet_alarm.py --test` plays the alarm once at start, then again after 10 s of the valve being open.
+
+To update the Pi after changing the code: `rsync -a pi/ bidet-alarm:bidet-alarm/pi/ && ssh bidet-alarm sudo systemctl restart bidet-alarm`.
 
 ### Status page
 
-**http://bidet-alarm.local/** (on the home Wi-Fi) shows whether the valve is open or closed, with water pouring in while it's open. The bell under it fills up as the 10-minute alarm gets closer and turns red and rings once the alarm goes off; tap it to see how long the valve has been open and when the alarm goes off. A "No connection" badge appears only if updates stop. Below that is the open/closed history, 10 per page. The history is kept in SQLite on the Pi (`~/bidet-alarm.db`); entries older than a year, or beyond the newest 10,000, are deleted automatically (`KEEP_DAYS`, `MAX_EVENTS`). Add `?demo` to the URL to preview the animations with fake data.
+**[http://bidet-alarm.local/](http://bidet-alarm.local/)** — open it on any phone or computer on the home Wi-Fi.
 
-To add it to a phone's home screen as an app ("Bidet", water-drop icon): on iPhone open it in Safari → Share → **Add to Home Screen**; on Android open it in Chrome → ⋮ → **Add to Home screen**.
+| Open → alarm → closed | Tap the bell for details | Updates stopped |
+|---|---|---|
+| ![Status page cycle](docs/pi/status-cycle.gif) | ![Details popup](docs/pi/status-details.gif) | ![No connection](docs/pi/status-offline.png) |
+
+- **Closed** (green) or **Open** (amber, water pouring in). Opening shakes the label; closing draws a checkmark while the water drains.
+- **Bell:** its ring fills up as the 10-minute limit gets closer. When the alarm goes off, the card turns red and the bell rings. Tap the bell to see how long the valve has been open, when it was opened and when the alarm goes off.
+- **Wi-Fi icon** (top right) appears only when the page stops getting updates.
+- **History** of opens, closes and alarms, 10 per page, with how long each opening lasted.
+- **Install as an app** ("Bidet", water-drop icon): iPhone: open it in Safari → Share → **Add to Home Screen**. Android: Chrome → ⋮ → **Add to Home screen**.
+- `.local` names work on Macs, iPhones and most PCs. If a device can't open it, use the Pi's IP address instead (`ssh bidet-alarm hostname -I`).
+- Add `?demo` to the URL to preview the animations with fake data (these GIFs were recorded that way).
+
+The alarm program serves the page itself on port 80, so if the page loads, the alarm is running. The history is stored in SQLite on the Pi (`~/bidet-alarm.db`) and survives restarts; entries older than a year, or beyond the newest 10,000, are deleted automatically (`KEEP_DAYS` and `MAX_EVENTS` in the service file). If the Pi restarts while the valve is open, the timer carries on from when it was opened.
 
 ### Pi software
 
 - `pi/bidet_alarm.py`: `--calibrate` prints the sensor reading live, `--test` alarms after 10 s, no flag is the normal 10-minute run. It also serves the status page and finds a USB speaker by itself.
-- `pi/status.html`: the status page.
-- `pi/bidet-alarm.service`: starts the alarm at boot (`sudo cp pi/bidet-alarm.service /etc/systemd/system/ && sudo systemctl enable --now bidet-alarm`).
+- `pi/status.html`, `pi/manifest.json`, `pi/*icon*.png`: the status page and its home-screen app name and icon.
+- `pi/bidet-alarm.service`: starts the alarm at boot and lets it serve port 80. `setup_from_mac.sh` installs it; by hand: `sudo cp pi/bidet-alarm.service /etc/systemd/system/ && sudo systemctl enable --now bidet-alarm`. Logs: `journalctl -u bidet-alarm -f`. Optional settings in the file: `NTFY_TOPIC` (phone notification), `AUDIO_DEVICE` (force a speaker), `KEEP_DAYS`/`MAX_EVENTS` (history pruning).
 - `pi/prepare_sd_card.sh`, `pi/setup_from_mac.sh`, `pi/firstboot/`: the setup steps above.
 
 ## Repo layout

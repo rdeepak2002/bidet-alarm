@@ -35,12 +35,18 @@ rsync -az --delete --exclude .git --exclude '__pycache__' --exclude '*.stl' "$RE
 echo "Installing packages (gpiozero + ALSA tools; usually already present)..."
 ssh "$HOST" 'sudo apt-get update -qq && sudo apt-get install -y -qq python3-gpiozero python3-lgpio alsa-utils >/dev/null && echo "  done"'
 
+echo "Installing the alarm service (starts at boot, serves the status page)..."
+ssh "$HOST" 'sudo cp ~/bidet-alarm/pi/bidet-alarm.service /etc/systemd/system/ && sudo systemctl daemon-reload &&
+             sudo systemctl enable --now bidet-alarm >/dev/null 2>&1 && echo "  running"'
 cat <<'EOF'
 
-Pi is ready. Next (desk test):
+Pi is ready. Status page: http://bidet-alarm.local/
+Next (desk test):
   1. Shut it down:      ssh bidet-alarm sudo poweroff     (wait for the green LED to stop)
   2. Wire the KY-024:   + -> pin 1 (3.3V),  G -> pin 6 (GND),  D0 -> pin 11 (GPIO17)
   3. Power it back on, then:
        ssh bidet-alarm
+       sudo systemctl stop bidet-alarm          # frees the sensor pin for calibrating
        cd bidet-alarm && python3 pi/bidet_alarm.py --calibrate
+       sudo systemctl start bidet-alarm
 EOF

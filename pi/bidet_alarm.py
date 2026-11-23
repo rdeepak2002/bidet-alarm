@@ -150,8 +150,9 @@ class Web(BaseHTTPRequestHandler):
             except ValueError:
                 page, per = 1, 10
             with lock:
-                total = db.execute("SELECT COUNT(*) FROM events").fetchone()[0]
-                rows = db.execute("SELECT t, event, open_for FROM events ORDER BY id DESC LIMIT ? OFFSET ?",
+                total = db.execute("SELECT COUNT(*) FROM events WHERE event != 'started'").fetchone()[0]
+                rows = db.execute("SELECT t, event, open_for FROM events WHERE event != 'started' "
+                                  "ORDER BY id DESC LIMIT ? OFFSET ?",
                                   (per, (page - 1) * per)).fetchall()
             items = [{"t": t, "event": e, "open_for": o} for t, e, o in rows]
             pages = max(1, -(-total // per))
@@ -166,7 +167,7 @@ class Web(BaseHTTPRequestHandler):
                 self._send(200, f.read(), STATIC[self.path])
         elif self.path == "/api/state":
             with lock:
-                n = db.execute("SELECT MAX(id) FROM events").fetchone()[0]
+                n = db.execute("SELECT MAX(id) FROM events WHERE event != 'started'").fetchone()[0]
                 body = dict(state, now=time.time(), latest=n)
             self._send(200, json.dumps(body).encode(), "application/json")
         else:
@@ -250,6 +251,8 @@ def main():
     elif sensor.value == MAGNET_NEAR_VALUE and last and last[1] == "closed":
         record(None, is_open=False, since=last[0])
     record("started")
+    if args.test:
+        play_alarm()   # one beep straight away, to check the speaker
 
     while True:
         is_open = sensor.value != MAGNET_NEAR_VALUE
