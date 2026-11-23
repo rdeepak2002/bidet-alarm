@@ -8,6 +8,7 @@ Generates print/pi4_case_base.stl and print/pi4_case_lid.stl.
   - USB-C opening is oversized for a chunky power plug (USB_C_OPEN_W x USB_C_OPEN_H).
   - One USB-A opening (lower USB 2.0 port) for the speaker; the other USB ports and Ethernet are covered.
   - SD card stays inside: the SD end has room for an inserted card sticking out ~3 mm (plus 0.8 mm).
+  - Two round zip-tie loops on the plain long side (next to the GPIO header), flush with the bottom.
   - micro-HDMI and the 3.5 mm audio jack are covered (headless, USB speaker).
 
 Run:  python pi_case.py   (needs manifold3d trimesh numpy)
@@ -36,6 +37,8 @@ FIT = 0.25              # lid lip clearance
 # inside of the box, in board coordinates (board is 0..85 x 0..56)
 IN_X0, IN_X1 = -4.0, 88.0   # SD end: inserted card (sticks out ~2.5-3 mm) clears the wall; port end: USB/Ethernet fronts (to 87.6) clear it
 IN_Y0, IN_Y1 = -3.0, 57.0   # port side has 3 mm for the HDMI/audio/USB-C fronts
+TIE_XS = (14.0, 70.0)   # zip-tie loops on the plain long side (GPIO side), flush with the bottom, at these x
+TIE_OD, TIE_HOLE, TIE_T = 13.0, 6.0, 3.0   # loop outer diameter, hole (fits ties up to ~5 mm wide), thickness
 HOLES = [(3.5, 3.5), (61.5, 3.5), (3.5, 52.5), (61.5, 52.5)]
 # ---------------------------------------------------------------------------
 
@@ -113,6 +116,12 @@ def base():
     az = PCB_Z1 + USB_A_DZ
     b -= box(IN_X1 - 1, USB_A_Y - USB_A_OPEN_W / 2, az - USB_A_OPEN_H / 2,
              OX1 + 1, USB_A_Y + USB_A_OPEN_W / 2, az + USB_A_OPEN_H / 2)
+    # zip-tie loops on the plain long side next to the GPIO header (print flat, no supports)
+    for tx in TIE_XS:
+        cy = OY1 + (TIE_OD / 2 - 1.0)
+        ear = Manifold.batch_hull([cyl(TIE_OD, TIE_T).translate([tx, cy, 0]),
+                                   box(tx - TIE_OD / 2, OY1 - 1.0, 0, tx + TIE_OD / 2, OY1, TIE_T)])
+        b += ear - cyl(TIE_HOLE, TIE_T + 2).translate([tx, cy, -1])
     # floor vents
     for i in range(7):
         x = 14 + i * 6
@@ -171,5 +180,5 @@ if __name__ == "__main__":
     Lp = Lp.translate([0, 0, -Lp.bounding_box()[2]])
     to_trimesh(Lp).export(os.path.join(OUT, "pi4_case_lid.stl"))
     for n in ("pi4_case_base.stl", "pi4_case_lid.stl"):
-        m = trimesh.load(os.path.join(OUT, n))
+        m = trimesh.load(os.path.join(OUT, n), force="mesh")
         print(f"{n:22} watertight={m.is_watertight} size={np.round(m.extents, 1)} mm")
