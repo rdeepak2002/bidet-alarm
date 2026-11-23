@@ -77,15 +77,29 @@ holder = ky024_holder()
 # ------------------------------------------------------------------ cover (splash / condensation / bump protection)
 COVER_WALL = 1.6
 PLUG_LEN = 16.0      # header pins + Dupont plugs stick out this far past the board's end
+RIB_BITE = 0.2       # v2 cover: how far each crush rib presses into the holder's side
 COMP_H = 13.5        # room in front of the board: trimmer + its screw measured taller than 10 mm (cover jammed)
 
 
-def ky024_cover():
-    xi = xo + rail + 0.25                       # slides over the holder with 0.25 mm clearance
+def ky024_cover(friction=False):
+    """friction=False: loose slip-over cover held by the zip ties.
+    friction=True (v2): snug side walls with crush ribs that grip the holder, and inner ledges that stop
+    on the holder's top so the roof never presses on the board."""
+    xi = xo + rail + (0.08 if friction else 0.25)   # side clearance to the holder
     yi = y_f - COMP_H                           # inside front face
     z_bot = board_z0 - PLUG_LEN - 1.0             # skirt reaches past the Dupont plugs so they're hidden
     shell = box(-xi - COVER_WALL, yi - COVER_WALL, z_bot, xi + COVER_WALL, y_back, z_roof + ROOF)
     shell -= box(-xi, yi, z_bot - 1, xi, y_back + 1, z_roof)        # open back (hose side) and bottom (cable, drainage)
+    if friction:
+        hx = xo + rail                                              # holder half-width
+        for sx in (1, -1):
+            # 3 vertical crush ribs per side, 0.2 mm interference with the holder's sides
+            for yc in (y_f - 1.2, (y_f + y_back) / 2, y_back - 1.2):
+                x0, x1 = sorted((sx * (hx - RIB_BITE), sx * xi))
+                shell += box(x0, yc - 0.4, tray_bot + 1, x1, yc + 0.4, tray_top - 0.5)
+            # ledge that lands on the holder's top rail (outside the board, which stops at |x| = 7.65)
+            x0, x1 = sorted((sx * (hx - 2.0), sx * xi))
+            shell += box(x0, y_f - 2.0, tray_top, x1, y_back, tray_top + 1.2)
     for zc in (tray_bot + 8, tray_top - 8):                         # zip ties pass through the sides, into the tunnels
         shell -= box(-xi - COVER_WALL - 1, y_b + 0.6, zc - 2.8, xi + COVER_WALL + 1, y_b + 3.0, zc + 2.8)
     # shallow notch in the roof's back edge where it meets the hose (the nut is far above now)
@@ -94,6 +108,7 @@ def ky024_cover():
 
 
 cover = ky024_cover()
+cover_v2 = ky024_cover(friction=True)
 
 # reference KY-024 board for the viewer
 board = box(-KY_W / 2, y_f, board_z0, KY_W / 2, y_b, pcb_top_z)
@@ -109,6 +124,8 @@ save = lambda m, name: to_trimesh(m).export(os.path.join(OUT, name))
 save(holder.translate([0, 0, -tray_bot]), "ky024_holder.stl")
 cv = cover.rotate([90, 0, 0])                    # front face down on the bed: no supports needed
 save(cv.translate([0, 0, -cv.bounding_box()[2]]), "ky024_cover.stl")
+cv2 = cover_v2.rotate([90, 0, 0])
+save(cv2.translate([0, 0, -cv2.bounding_box()[2]]), "ky024_cover_v2.stl")
 for b in g["LEVER_BORES"]:
     save(g["lever_cap"](b)[0], f"lever_cap_{b:.1f}mm.stl")
 
@@ -143,6 +160,12 @@ print("cover vs board+parts+hall", round(v(cover ^ (board + board_parts + hall +
 print("cover vs valve/pipe     ", round(v(cover ^ (g["valve"] + g["pipe"])), 2), "mm^3")
 worst_c = max(v((g["lever"] + g["cap_asm"]).rotate([0, -a, 0]) ^ cover) for a in range(0, 91, 5))
 print("lever swing vs cover    ", round(worst_c, 2), "mm^3")
+# v2: ribs should bite the holder a little; nothing else may touch
+print("v2 cover vs holder (rib bite, want ~small >0)", round(v(cover_v2 ^ holder), 1), "mm^3")
+print("v2 cover vs board+parts+hall+plugs", round(v(cover_v2 ^ (board + board_parts + hall + legs + pins)), 2), "mm^3")
+print("v2 cover vs valve/pipe   ", round(v(cover_v2 ^ (g["valve"] + g["pipe"])), 2), "mm^3")
+print("v2 lever swing vs cover  ", round(max(v((g["lever"] + g["cap_asm"]).rotate([0, -a, 0]) ^ cover_v2) for a in range(0, 91, 5)), 2), "mm^3")
+print(f"v2 ledge sits on holder top: roof underside {z_roof - tray_top:.1f} mm above holder top, board tip {pcb_top_z - tray_top:.1f} mm -> roof clears board by {z_roof - pcb_top_z:.1f} mm")
 print(f"magnet face -> cover roof clearance = {magnet_z - (z_roof + ROOF):.1f} mm")
 print(f"magnet centre y={LEVER_Y:.2f}  sensor centre y={y_f - HALL_OUT / 2:.2f}")
 print(f"magnet face z={magnet_z:.1f}  sensor face z={sensor_face_z:.1f}  gap={magnet_z - sensor_face_z:.1f} mm")
