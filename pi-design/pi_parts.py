@@ -27,6 +27,7 @@ HALL_OUT = 5.0                        # how far the upright sensor sticks out fr
 SENSOR_GAP = 12.5                     # magnet face -> Hall sensor face, valve closed (user: 10-15 mm triggers reliably)
 PCB_PROUD = 3.0                       # board sticks out this far above the holder
 FIT = 0.3                             # slot clearance
+BACK_RELIEF = 3.0                     # clearance channel behind the board for solder tails (measured: tails jammed a flat slot)
 PIPE_D = g["PIPE_D"]
 LEVER_Y = g["MAGNET_Y"]               # magnet centre (lever axis, shifted away from the valve for wide magnets)
 # ---------------------------------------------------------------------------
@@ -58,6 +59,8 @@ def ky024_holder():
     # board slot (edges captured by 1 mm lips in front)
     body -= box(-xo, y_f - FIT, tray_bot - 1, xo, y_b + FIT, tray_top + 1)
     body -= box(-xo + 1.0, y_f - 3, tray_bot - 1, xo - 1.0, y_f, tray_top + 1)   # open front for components
+    # channel behind the board for solder tails / pin ends on its back (board rides on 1.5 mm side rails)
+    body -= box(-xo + 1.5, y_b, tray_bot - 1, xo - 1.5, y_b + BACK_RELIEF, tray_top + 1)
     # stops at the bottom corners so the board can't slide through (header pins pass between them)
     for s in (1, -1):
         body += box(min(s * (xo - 2.0), s * xo), y_f - FIT, tray_bot, max(s * (xo - 2.0), s * xo), y_b + FIT, tray_bot + STOP_H)
@@ -128,6 +131,9 @@ v = lambda m: m.volume()
 print("holder vs valve/nut     ", round(v(holder ^ g["valve"]), 2), "mm^3")
 print("holder vs supply line   ", round(v(holder ^ g["pipe"]), 2), "mm^3")
 print("holder vs board         ", round(v(holder ^ board), 2), "mm^3")
+tails = box(-KY_W / 2 + 1.6, y_b, board_z0, KY_W / 2 - 1.6, y_b + BACK_RELIEF - 0.2, pcb_top_z)
+print("holder vs solder tails  ", round(v(holder ^ tails), 2), "mm^3")
+print(f"wall left behind the channel at the groove apex: {apex - (y_b + BACK_RELIEF):.1f} mm")
 worst = max(v((g["lever"] + g["cap_asm"]).rotate([0, -a, 0]) ^ (holder + board + hall)) for a in range(0, 91, 5))
 print("lever swing vs holder   ", round(worst, 2), "mm^3")
 print("cover vs holder         ", round(v(cover ^ holder), 2), "mm^3")
