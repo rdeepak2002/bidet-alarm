@@ -21,6 +21,7 @@
     --water:#4f9cf2; --water2:#86bdf7;
     --shadow:0 1px 2px rgba(22,32,46,.04), 0 8px 24px rgba(22,32,46,.06);
     --ring:min(220px, 62vw);
+    --row:66px;
   }
   * { box-sizing:border-box; }
   html { background:var(--bg); }
@@ -131,7 +132,8 @@
 
   /* ---- history ---- */
   ul { list-style:none; margin:0; padding:0; }
-  li { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--line); animation:fadeUp .35s both; }
+  /* every row is the same height, so the pager never moves between pages */
+  li { display:flex; align-items:center; gap:12px; height:var(--row); padding:0; border-bottom:1px solid var(--line); animation:fadeUp .35s both; }
   li:last-child { border-bottom:0; }
   .ev { width:32px; height:32px; border-radius:10px; flex:none; display:grid; place-items:center; font-size:15px; font-weight:700; }
   .ev.opened { background:var(--warn-soft); color:var(--warn); }
@@ -140,7 +142,7 @@
   .ev.started { background:#eef2f8; color:var(--muted); }
   .what { flex:1; min-width:0; }
   .what b { font-weight:600; font-size:15px; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .what small { color:var(--muted); font-size:13px; }
+  .what small { color:var(--muted); font-size:13px; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .when { color:var(--muted); font-size:13px; text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
   .empty { color:var(--faint); justify-content:center; }
   .pager { display:flex; justify-content:space-between; align-items:center; margin-top:14px; gap:8px; }
@@ -232,6 +234,8 @@ async function loadPage() {
       `</span><span class="when">${clock(h.t)}</span></li>`; }).join('') || '<li class="empty">No events yet</li>';
   $('histCard').hidden = false;
   $('pager').hidden = d.pages <= 1;
+  // with several pages, reserve room for a full page so a short last page doesn't move the buttons
+  $('hist').style.minHeight = d.pages > 1 ? `calc(var(--row) * ${PER})` : '';
   $('pageNo').textContent = `${d.page} / ${d.pages}`;
   $('prev').disabled = d.page <= 1; $('next').disabled = d.page >= d.pages;
 }
