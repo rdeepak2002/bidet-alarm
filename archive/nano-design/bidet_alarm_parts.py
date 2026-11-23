@@ -36,7 +36,7 @@ MAGNET_FIT = 0.25                    # extra diameter for the magnet pocket
 SENSOR_W, SENSOR_D, SENSOR_L = 14.0, 7.5, 27.0   # uxcell MC-38: 27 x 14 x 7.5 mm
 SENSOR_FIT = 0.6
 STANDOFF = 16.0     # pipe centre -> sensor centre distance (how far the lever sits in front of the hose)
-PIPE_D = 10.0       # braided supply line diameter (V-groove fits ~8-16 mm)
+PIPE_D = 13.1       # braided hose diameter (measured)
 NUT_D = 22.0        # coupling nut under the valve (across corners); the cradle top can slide up around it
 NUT_RELIEF = 10.0   # how far the cradle top can overlap the nut
 

@@ -58,7 +58,7 @@
       <div class="controls">
         <button id="bClosed" class="on">Knob closed</button>
         <button id="bOpen">Knob open</button>
-        <span class="badge" id="state">Magnet 3 mm above sensor → OK</span>
+        <span class="badge" id="state">Magnet 12.5 mm above sensor → OK</span>
         <button id="bCover" class="on">Cover on</button>
       </div>
       <div class="legend">
@@ -76,14 +76,14 @@
       <h2>How it works</h2>
       <ol>
         <li>The lever cap holds a <b>stack of ten 12 mm magnets</b> (15.7 mm tall) at the lever tip, offset 3.7 mm away from the valve so the wide stack can't rub it.</li>
-        <li>The printed holder zip-ties to the supply line. It holds the KY-024 with its Hall sensor bent to face straight up, <b>3 mm under the magnet</b>.</li>
-        <li><b>Closed:</b> about 120 mT reaches the sensor, which needs only a few mT (the threshold screw sets the exact level). D0 reads "magnet near".</li>
+        <li>The printed holder zip-ties to the supply line. It holds the KY-024 upright with the sensor end up. The Hall sensor stands in the board's end slot with its flat face up, <b>about 12.5 mm under the magnet</b> (anywhere from 10 to 15 mm works).</li>
+        <li><b>Closed:</b> about 45 mT reaches the sensor, which needs only a few mT (the threshold screw sets the exact level). D0 reads "magnet near".</li>
         <li><b>Open:</b> the lever swings 90° and the field drops to about 0.2 mT. A 10-minute timer starts.</li>
         <li>After 10 minutes, the Pi plays the alarm on the <b>USB speaker</b> every 30 s until the valve is closed. It can also send a <b>phone notification</b>.</li>
       </ol>
       <div class="note">The field figures are calculated, not measured. The desk test (Phase 1) confirms them before you print anything.</div>
       <h3>Is it safe?</h3>
-      <p style="margin:0">Yes, for people. The sensor runs at 3.3 V and draws a few mA, so there's no shock or fire risk. A bare board <i>is</i> exposed to splashes and to condensation on the cold supply line, which can cause corrosion or false readings. That's what the printed <b>cover</b> is for. It shields the board from splashes and bumps, and the Hall sensor sits under a 0.8 mm plastic roof that magnetic fields pass straight through. The bottom stays open so the cable can exit and water drains out. For extra protection, brush clear nail polish over the board's solder joints. Keep the Pi itself in a case somewhere dry.</p>
+      <p style="margin:0">Yes, for people. The sensor runs at 3.3 V and draws a few mA, so there's no shock or fire risk. A bare board <i>is</i> exposed to splashes and to condensation on the cold supply line, which can cause corrosion or false readings. That's what the printed <b>cover</b> is for. It shields the board from splashes and bumps, and the board's end sits under a 0.8 mm plastic roof that magnetic fields pass straight through. The bottom stays open so the cable can exit and water drains out. For extra protection, brush clear nail polish over the board's solder joints. Keep the Pi itself in a case somewhere dry.</p>
     </section>
   </div>
 
@@ -198,7 +198,7 @@
 
     <div class="phase" style="margin-top:14px">Phase 2 · Measure, print, test-fit</div>
     <ul class="check">
-      <li><input type="checkbox"><span>Measure the KY-024 board: its <b>length and width</b>, and how far the bent sensor sits above the board's top edge.</span></li>
+      <li><input type="checkbox"><span>Measure the KY-024 board: its <b>length and width</b>, (done: 34.7 × 15.3 mm, sensor 3.5 mm back from the end).</span></li>
       <li><input type="checkbox"><span>Measure the valve with the knob closed:
         <ul style="margin:4px 0 0 0;padding-left:18px">
           <li>the lever's thickness</li>
@@ -210,7 +210,7 @@
       <li><input type="checkbox"><span>Print <code>ky024_holder.stl</code>, standing upright with no supports. Slide the board in from the top, sensor end up and header pins down.</span></li>
       <li><input type="checkbox"><span>Bend the Hall sensor's legs so its flat face points straight up at the magnet.</span></li>
       <li><input type="checkbox"><span>Print <code>ky024_cover.stl</code> with its front face down and no supports.</span></li>
-      <li><input type="checkbox"><span>Fit the cap on the lever with its <b>flat side toward the valve</b>. Hold the holder against the supply line with a <b>3 mm gap</b> and check the LED.</span></li>
+      <li><input type="checkbox"><span>Fit the cap on the lever with its <b>flat side toward the valve</b>. Hold the holder against the hose with the magnet <b>10–15 mm above the sensor end</b> and check the live reading.</span></li>
       <li><input type="checkbox"><span>Slide the <b>cover</b> over the holder. Run 2 zip ties through the slots in the cover's sides, through the holder's tunnels and around the hose, then tighten. If you need to adjust the threshold again, reach the screw through the hole in the cover's front.</span></li>
       <li><input type="checkbox"><span>Turn the knob open and closed a few times. The LED should follow it every time, and the lever should clear the holder.</span></li>
     </ul>
@@ -336,7 +336,7 @@ function setKnob(open) {
   document.getElementById('bOpen').classList.toggle('on', open);
   document.getElementById('bClosed').classList.toggle('on', !open);
   const st = document.getElementById('state');
-  st.textContent = open ? 'Magnet away → 10-min timer starts' : 'Magnet 3 mm above sensor → OK';
+  st.textContent = open ? 'Magnet away → 10-min timer starts' : 'Magnet 12.5 mm above sensor → OK';
   st.classList.toggle('alarm', open);
 }
 document.getElementById('bOpen').onclick = () => setKnob(true);
