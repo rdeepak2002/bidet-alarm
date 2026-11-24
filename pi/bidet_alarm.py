@@ -49,6 +49,10 @@ BEEP_SOUND = os.path.join(HERE, ".beep.wav")
 # If it's empty, a plugged-in USB sound device is used automatically (set to 100% volume each time
 # it plays), else the system default.
 AUDIO_DEVICE = os.environ.get("AUDIO_DEVICE", "")
+# Speaker volume in %. 100% with a loud song tripped the Pi's USB over-current protection, which
+# resets the speaker (it comes back at its quiet default). Raise it if your speaker draws less power.
+ALARM_VOLUME = int(os.environ.get("ALARM_VOLUME", "85"))
+VOLUME_EVERY = 3.0   # while alarming, re-apply the volume this often (in case the speaker was reset)
 WEB_PORT = int(os.environ.get("WEB_PORT", "80"))
 PAGE = os.path.join(HERE, "status.html")
 STATIC = {"/manifest.json": "application/manifest+json", "/apple-touch-icon.png": "image/png",
@@ -120,14 +124,14 @@ def audio_device():
 
 
 def max_volume(dev):
-    """Turn every playback control on the speaker's sound card to 100% and unmute it."""
+    """Set every playback control on the speaker's sound card to ALARM_VOLUME and unmute it."""
     card = dev.split("CARD=")[1].split(",")[0] if "CARD=" in dev else ""
     if not card:
         return
     try:
         out = subprocess.run(["amixer", "-c", card, "scontrols"], capture_output=True, text=True, timeout=5).stdout
         for name in [line.split("'")[1] for line in out.splitlines() if "'" in line]:
-            subprocess.run(["amixer", "-q", "-c", card, "sset", name, "100%", "unmute"], capture_output=True, timeout=5)
+            subprocess.run(["amixer", "-q", "-c", card, "sset", name, f"{ALARM_VOLUME}%", "unmute"], capture_output=True, timeout=5)
     except Exception as e:   # volume is a nice-to-have; never block the alarm on it
         print("volume:", e, file=sys.stderr)
 
@@ -139,12 +143,14 @@ def play_alarm(wait=True):
     if not os.path.exists(sound):
         make_beep(BEEP_SOUND)
     dev = audio_device()
-    max_volume(dev)   # USB speaker at full volume every time
+    max_volume(dev)   # set the volume every time: a reset speaker comes back quiet
     cmd = ["aplay", "-q"] + (["-D", dev] if dev else []) + [sound]
     if wait:
         subprocess.run(cmd, check=False)
         return None
-    return subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True)
+    proc.dev = dev   # remember where it plays, so it can be moved if the speaker comes back
+    return proc
 
 
 def stop_sound(proc):
@@ -268,6 +274,7 @@ def main():
     delay = 10 if args.test else ALARM_DELAY
     state["alarm_delay"] = delay
     opened_at = last_alarm = None
+    last_volume = 0.0
     sound = None   # the alarm sound while it's playing
     print(f"Running. Alarm after {delay} s open.")
     open_db()
@@ -309,10 +316,25 @@ def main():
         if opened_at is not None and now - opened_at >= delay:
             # non-stop: start the sound again as soon as the last one finishes, until it's closed
             if sound is None or sound.poll() is not None:
+                if sound is not None and sound.returncode != 0:   # e.g. the speaker was reset mid-song
+                    err = (sound.stderr.read() or "").strip() if sound.stderr else ""
+                    print(time.strftime("%H:%M:%S"), "sound stopped early:", err or sound.returncode, flush=True)
+                    time.sleep(0.5)   # give a re-connecting speaker a moment
                 if last_alarm is None:
                     record("alarm", alarming=True)
                 sound = play_alarm(wait=False)
-                last_alarm = now
+                last_alarm = last_volume = now
+            elif now - last_volume >= VOLUME_EVERY:
+                # a speaker reset while playing comes back quiet, and if the song restarted while
+                # the speaker was missing it is playing to the Pi's own (silent) output: fix both
+                dev = audio_device()
+                if dev != sound.dev:
+                    print(time.strftime("%H:%M:%S"), "speaker changed, restarting the sound on", dev or "default", flush=True)
+                    stop_sound(sound)
+                    sound = play_alarm(wait=False)
+                else:
+                    max_volume(dev)
+                last_volume = now
         time.sleep(0.1)
 
 

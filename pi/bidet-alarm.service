@@ -13,6 +13,8 @@ WorkingDirectory=/home/pi/bidet-alarm/pi
 ExecStart=/usr/bin/python3 /home/pi/bidet-alarm/pi/bidet_alarm.py
 Environment=MAGNET_NEAR_VALUE=1
 Environment=PYTHONUNBUFFERED=1
+# Speaker volume %. 100 tripped the USB over-current protection with a loud song.
+Environment=ALARM_VOLUME=85
 # A USB speaker is found automatically. To force one: aplay -L | grep -i usb, then
 # Environment=AUDIO_DEVICE=plughw:CARD=Device,DEV=0
 # Status page on http://bidet-alarm.local/ (port 80 needs the capability below)
