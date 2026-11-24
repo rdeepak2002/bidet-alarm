@@ -11,7 +11,7 @@ Hardware (no extra parts):
 
 Usage:
   python3 bidet_alarm.py --calibrate     # prints the sensor reading live; use it to set up
-  python3 bidet_alarm.py --test          # alarm after 10 s instead of 10 min
+  python3 bidet_alarm.py --test          # alarm after 10 s instead of 5 min
   python3 bidet_alarm.py                 # normal run (see bidet-alarm.service to start at boot)
 
 Status page: while it runs, http://bidet-alarm.local/ shows whether the valve is open, for how
@@ -39,7 +39,7 @@ SENSOR_GPIO = 17
 # KY-024 boards differ; run --calibrate and set this to what you see with the magnet near.
 MAGNET_NEAR_VALUE = int(os.environ.get("MAGNET_NEAR_VALUE", "1"))   # this KY-024 reads 1 with the magnet near (measured)
 
-ALARM_DELAY = 10 * 60       # seconds the valve may stay open
+ALARM_DELAY = 5 * 60        # seconds the valve may stay open
 DEBOUNCE = 1.0              # a change must hold this long to count (ignores bumps and glitches)
 HERE = os.path.dirname(os.path.abspath(__file__))
 CUSTOM_SOUND = os.path.join(HERE, "alarm.wav")   # drop your own recording here to use it

@@ -1,6 +1,6 @@
 # Bidet Alarm
 
-A small device that sounds an alarm if the handheld bidet sprayer's T-valve is left open for more than 10 minutes. A magnet on the valve lever moves away from a sensor when the knob is turned on; a timer starts, and if the knob isn't turned back off, a speaker plays an alarm.
+A small device that sounds an alarm if the handheld bidet sprayer's T-valve is left open for more than 5 minutes. A magnet on the valve lever moves away from a sensor when the knob is turned on; a timer starts, and if the knob isn't turned back off, a speaker plays an alarm.
 
 Built for an **Arofa handheld bidet sprayer** with a 7/8" T-valve. The lever points down when the valve is closed and sideways when it's open. Other T-valves with a lever handle should work after adjusting the parameters.
 
@@ -69,7 +69,7 @@ To update the Pi after changing the code: `rsync -a pi/ bidet-alarm:bidet-alarm/
 | ![Status page cycle](docs/pi/status-cycle.gif) | ![Details popup](docs/pi/status-details.gif) | ![No connection](docs/pi/status-offline.png) |
 
 - **Closed** (green) or **Open** (amber, water pouring in). Opening shakes the label; closing draws a checkmark while the water drains.
-- **Bell:** its ring fills up as the 10-minute limit gets closer. When the alarm goes off, the card turns red and the bell rings. Tap the bell to see how long the valve has been open, when it was opened and when the alarm goes off.
+- **Bell:** its ring fills up as the 5-minute limit gets closer. When the alarm goes off, the card turns red and the bell rings. Tap the bell to see how long the valve has been open, when it was opened and when the alarm goes off.
 - **Wi-Fi icon** (top right) appears only when the page stops getting updates.
 - **History** of opens, closes and alarms, 10 per page, with how long each opening lasted.
 - **Install as an app** ("Bidet", water drop with an alarm bell): iPhone: open it in Safari → Share → **Add to Home Screen**. Android: Chrome → ⋮ → **Add to Home screen**.
@@ -80,7 +80,7 @@ The alarm program serves the page itself on port 80, so if the page loads, the a
 
 ### Pi software
 
-- `pi/bidet_alarm.py`: `--calibrate` prints the sensor reading live, `--test` alarms after 10 s, no flag is the normal 10-minute run. It also serves the status page and finds a USB speaker by itself.
+- `pi/bidet_alarm.py`: `--calibrate` prints the sensor reading live, `--test` alarms after 10 s, no flag is the normal 5-minute run (`ALARM_DELAY` in the script). It also serves the status page and finds a USB speaker by itself.
 - `pi/status.html`, `pi/manifest.json`, `pi/*icon*.png`: the status page and its home-screen app name and icon.
 - `pi/bidet-alarm.service`: starts the alarm at boot and lets it serve port 80. `setup_from_mac.sh` installs it; by hand: `sudo cp pi/bidet-alarm.service /etc/systemd/system/ && sudo systemctl enable --now bidet-alarm`. Logs: `journalctl -u bidet-alarm -f`. Optional settings in the file: `AUDIO_DEVICE` (force a speaker), `KEEP_DAYS`/`MAX_EVENTS` (history pruning).
 - `pi/prepare_sd_card.sh`, `pi/setup_from_mac.sh`, `pi/firstboot/`: the setup steps above.
