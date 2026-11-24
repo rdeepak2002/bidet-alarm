@@ -81,6 +81,7 @@ The alarm program serves the page itself on port 80, so if the page loads, the a
 ### Pi software
 
 - `pi/bidet_alarm.py`: `--calibrate` prints the sensor reading live, `--test` alarms after 10 s, no flag is the normal 5-minute run (`ALARM_DELAY` in the script). It also serves the status page and finds a USB speaker by itself.
+- **Alarm sound:** a loud two-tone beep by default. To use your own sound, put a WAV file at `pi/alarm.wav` on the Pi; it plays on repeat, non-stop, until the valve is closed, with no restart needed. To convert a song or video: `ffmpeg -i input.mov -vn -af "loudnorm=I=-9:TP=-1" -ac 1 -c:a pcm_s16le pi/alarm.wav`, then `rsync -a pi/alarm.wav bidet-alarm:bidet-alarm/pi/`. `alarm.wav` is git-ignored so a personal or copyrighted sound never ends up in this public repo.
 - `pi/status.html`, `pi/manifest.json`, `pi/*icon*.png`: the status page and its home-screen app name and icon.
 - `pi/bidet-alarm.service`: starts the alarm at boot and lets it serve port 80. `setup_from_mac.sh` installs it; by hand: `sudo cp pi/bidet-alarm.service /etc/systemd/system/ && sudo systemctl enable --now bidet-alarm`. Logs: `journalctl -u bidet-alarm -f`. Optional settings in the file: `AUDIO_DEVICE` (force a speaker), `KEEP_DAYS`/`MAX_EVENTS` (history pruning).
 - `pi/prepare_sd_card.sh`, `pi/setup_from_mac.sh`, `pi/firstboot/`: the setup steps above.

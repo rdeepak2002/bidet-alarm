@@ -6,3 +6,6 @@
 network-config
 __pycache__/
 .DS_Store
+
+# custom alarm sound: personal, and may be copyrighted, so never committed
+pi/alarm.wav
