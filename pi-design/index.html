@@ -79,7 +79,7 @@
         <li>The printed holder zip-ties to the supply line. It holds the KY-024 upright with the sensor end up. The Hall sensor stands in the board's end slot with its flat face up, <b>about 12.5 mm under the magnet</b> (anywhere from 10 to 15 mm works).</li>
         <li><b>Closed:</b> about 45 mT reaches the sensor, which needs only a few mT (the threshold screw sets the exact level). D0 reads "magnet near".</li>
         <li><b>Open:</b> the lever swings 90° and the field drops to about 0.2 mT. A 10-minute timer starts.</li>
-        <li>After 10 minutes, the Pi plays the alarm on the <b>USB speaker</b> every 30 s until the valve is closed. It can also send a <b>phone notification</b>.</li>
+        <li>After 10 minutes, the Pi plays the alarm on the <b>USB speaker</b> non-stop until the valve is closed.</li>
       </ol>
       <div class="note">The field figures are calculated, not measured. The desk test (Phase 1) confirms them before you print anything.</div>
       <h3>Is it safe?</h3>
@@ -246,7 +246,7 @@
       </table>
       <div class="note">The KY-024 holder uses <b>typical</b> board sizes (38 × 15 mm). Measure your board first. Change <code>KY_L</code>, <code>KY_W</code> and <code>SENSOR_ABOVE_PCB</code> in <code>pi_parts.py</code> to match, then run it again.</div>
       <h3>Pi vs Nano</h3>
-      <p style="margin:0">The Pi version costs nothing, is louder, and can send phone alerts. It takes about 30 s to boot and uses about 3 W. If you later want a smaller, always-instant version, the <a href="../archive/nano-design/assembly.html">Nano design</a> uses the same lever cap.</p>
+      <p style="margin:0">The Pi version costs nothing, is louder, and has a live status page. It takes about 30 s to boot and uses about 3 W. If you later want a smaller, always-instant version, the <a href="../archive/nano-design/assembly.html">Nano design</a> uses the same lever cap.</p>
     </section>
   </div>
 </main>

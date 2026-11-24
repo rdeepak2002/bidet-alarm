@@ -40,7 +40,6 @@ SENSOR_GPIO = 17
 MAGNET_NEAR_VALUE = int(os.environ.get("MAGNET_NEAR_VALUE", "1"))   # this KY-024 reads 1 with the magnet near (measured)
 
 ALARM_DELAY = 10 * 60       # seconds the valve may stay open
-REPEAT_EVERY = 30           # seconds between repeated alarms
 DEBOUNCE = 1.0              # a change must hold this long to count (ignores bumps and glitches)
 HERE = os.path.dirname(os.path.abspath(__file__))
 CUSTOM_SOUND = os.path.join(HERE, "alarm.wav")   # drop your own recording here to use it
@@ -133,14 +132,28 @@ def max_volume(dev):
         print("volume:", e, file=sys.stderr)
 
 
-def play_alarm():
+def play_alarm(wait=True):
+    """Play the alarm sound once. wait=False starts it in the background and returns the process,
+    so the caller can keep reading the sensor and stop the sound the moment the valve closes."""
     sound = CUSTOM_SOUND if os.path.exists(CUSTOM_SOUND) else BEEP_SOUND
     if not os.path.exists(sound):
         make_beep(BEEP_SOUND)
     dev = audio_device()
     max_volume(dev)   # USB speaker at full volume every time
     cmd = ["aplay", "-q"] + (["-D", dev] if dev else []) + [sound]
-    subprocess.run(cmd, check=False)
+    if wait:
+        subprocess.run(cmd, check=False)
+        return None
+    return subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def stop_sound(proc):
+    if proc and proc.poll() is None:
+        proc.terminate()
+        try:
+            proc.wait(timeout=2)
+        except subprocess.TimeoutExpired:
+            proc.kill()
 
 
 class Web(BaseHTTPRequestHandler):
@@ -255,6 +268,7 @@ def main():
     delay = 10 if args.test else ALARM_DELAY
     state["alarm_delay"] = delay
     opened_at = last_alarm = None
+    sound = None   # the alarm sound while it's playing
     print(f"Running. Alarm after {delay} s open.")
     open_db()
     start_web()
@@ -286,17 +300,20 @@ def main():
             print(time.strftime("%H:%M:%S"), "valve OPEN")
             record("opened", is_open=True)
         elif not is_open and opened_at is not None:
+            stop_sound(sound)   # silence immediately, mid-beep if need be
+            sound = None
             print(time.strftime("%H:%M:%S"), "valve CLOSED")
             record("closed", is_open=False, alarming=False, open_for=round(now - opened_at))
             opened_at = None
         state["last_read"] = time.time()
         if opened_at is not None and now - opened_at >= delay:
-            if last_alarm is None or now - last_alarm >= REPEAT_EVERY:
+            # non-stop: start the sound again as soon as the last one finishes, until it's closed
+            if sound is None or sound.poll() is not None:
                 if last_alarm is None:
                     record("alarm", alarming=True)
-                play_alarm()
-                last_alarm = time.monotonic()
-        time.sleep(0.2)
+                sound = play_alarm(wait=False)
+                last_alarm = now
+        time.sleep(0.1)
 
 
 if __name__ == "__main__":
